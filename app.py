@@ -6,7 +6,6 @@ from email.mime.multipart import MIMEMultipart
 import time
 
 # Configurazione Pagina
-st.set_page_config(initial_sidebar_state="expanded")
 st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
 
 

@@ -103,7 +103,7 @@ if file_caricato:
             percentuale = (i + 1) / len(df)
             progresso.progress(percentuale)
             status_text.text(f"Inviando a {riga['Email']}... ({i+1}/{len(df)})")
-            time.sleep(0.5) # Piccola pausa per evitare spam filter
+            time.sleep(1) # Piccola pausa per evitare spam filter
 
         st.success(f"✅ Campagna completata! Inviate con successo {successi} su {len(df)} email.")
 else:

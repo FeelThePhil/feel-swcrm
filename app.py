@@ -9,27 +9,29 @@ import time
 st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
 
 # Codice per nascondere il menu e la barra superiore di Streamlit
-hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            header {visibility: hidden;}
-            footer {visibility: hidden;}
-            .stAppDeployButton {display:none;}
-            [data-testid="stStatusWidget"] {display:none;}
-            
-            /* Rimuove la toolbar in basso a destra (icona GitHub e barchetta) */
-            div[data-testid="stToolbar"] {display: none !important;}
-            div[data-testid="stDecoration"] {display: none !important;}
-            div[data-testid="stStatusWidget"] {display: none !important;}
-            #viewerBadge {display: none !important;}
-            
-            /* Rimuove lo spazio bianco extra che a volte rimane in fondo */
-            .stApp {
-                margin-bottom: -2rem;
-            }
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
+st.markdown("""
+    <style>
+    /* Nasconde tutto ciò che è legato a Streamlit */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stAppDeployButton {display:none;}
+    [data-testid="stStatusWidget"] {display:none;}
+    [data-testid="stToolbar"] {display: none !important;}
+    [data-testid="stHeader"] {display: none !important;}
+    #viewerBadge {display: none !important;}
+    
+    /* Rimuove i bordi e i padding eccessivi */
+    .main .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    
+    /* Forza la scomparsa dell'elemento in basso a destra */
+    iframe[title="Managed Navigation"] {display: none !important;}
+    div.stDeployButton {display:none;}
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- CREDENZIALI (Spostale qui) ---
 EMAIL_MITTENTE = "feel.swcrm@gmail.com"

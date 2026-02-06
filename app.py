@@ -7,6 +7,7 @@ import time
 
 # Configurazione Pagina
 st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
+
 # Codice per nascondere il menu e la barra superiore di Streamlit
 hide_st_style = """
             <style>
@@ -21,6 +22,7 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+
 # --- CREDENZIALI (Spostale qui) ---
 EMAIL_MITTENTE = "feel.swcrm@gmail.com"
 PASSWORD_APP = st.secrets["EMAIL_PASSWORD"] 

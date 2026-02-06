@@ -16,9 +16,17 @@ hide_st_style = """
             footer {visibility: hidden;}
             .stAppDeployButton {display:none;}
             [data-testid="stStatusWidget"] {display:none;}
-            /* Questo elimina i bottoni in basso a destra */
-            [data-testid="stToolbar"] {display: none;}
-            button[title="View source code"] {display: none;}
+            
+            /* Rimuove la toolbar in basso a destra (icona GitHub e barchetta) */
+            div[data-testid="stToolbar"] {display: none !important;}
+            div[data-testid="stDecoration"] {display: none !important;}
+            div[data-testid="stStatusWidget"] {display: none !important;}
+            #viewerBadge {display: none !important;}
+            
+            /* Rimuove lo spazio bianco extra che a volte rimane in fondo */
+            .stApp {
+                margin-bottom: -2rem;
+            }
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)

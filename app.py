@@ -13,6 +13,11 @@ hide_st_style = """
             #MainMenu {visibility: hidden;}
             header {visibility: hidden;}
             footer {visibility: hidden;}
+            .stAppDeployButton {display:none;}
+            [data-testid="stStatusWidget"] {display:none;}
+            /* Questo elimina i bottoni in basso a destra */
+            [data-testid="stToolbar"] {display: none;}
+            button[title="View source code"] {display: none;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)

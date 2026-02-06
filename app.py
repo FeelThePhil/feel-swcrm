@@ -67,18 +67,6 @@ if file_caricato:
 
     corpo_mail = st.text_area("Messaggio (usa [Nome] per personalizzare)", testo_default, height=180)
     
-    # Testo preimpostato in base alla scelta
-    if tipo_campagna == "Follow-up Lead":
-        oggetto_default = "Hai ancora bisogno di assistenza per la tua auto?"
-        testo_default = "Ciao [Nome],\n\nti scriviamo dall'Officina perché abbiamo visto che eri interessato ai nostri servizi. Hai ancora bisogno di supporto o vuoi fissare un appuntamento?\n\nA presto, il team di Feel."
-    else:
-        oggetto_default = "Scadenza Revisione imminente"
-        testo_default = "Ciao [Nome],\nti ricordiamo che la revisione per la tua vettura è in scadenza.\nContattaci per prenotare."
-
-    with col2:
-        oggetto = st.text_input("Oggetto Email", oggetto_default)
-
-    corpo_mail = st.text_area("Messaggio (usa [Nome] per personalizzare)", testo_default, height=150)
 
     # 3. Anteprima e Invio
     st.write("### 📋 Lista Lead Rilevati")

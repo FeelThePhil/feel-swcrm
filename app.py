@@ -11,25 +11,38 @@ st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
 # Codice per nascondere il menu e la barra superiore di Streamlit
 st.markdown("""
     <style>
-    /* Nasconde tutto ciò che è legato a Streamlit */
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stAppDeployButton {display:none;}
-    [data-testid="stStatusWidget"] {display:none;}
-    [data-testid="stToolbar"] {display: none !important;}
-    [data-testid="stHeader"] {display: none !important;}
-    #viewerBadge {display: none !important;}
-    
-    /* Rimuove i bordi e i padding eccessivi */
-    .main .block-container {
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+    /* 1. Nasconde la barra superiore (Share, Star, Edit, GitHub) */
+    header[data-testid="stHeader"] {
+        display: none !important;
     }
     
-    /* Forza la scomparsa dell'elemento in basso a destra */
-    iframe[title="Managed Navigation"] {display: none !important;}
-    div.stDeployButton {display:none;}
+    /* 2. Nasconde il menu a tre puntini e i bottoni di deploy */
+    .stAppDeployButton, 
+    div[data-testid="stStatusWidget"], 
+    #MainMenu {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 3. Nasconde la toolbar in basso a destra e il badge "Hosted with Streamlit" */
+    [data-testid="stToolbar"], 
+    footer, 
+    #viewerBadge, 
+    .st-emotion-cache-zq59as {
+        display: none !important;
+        vertical-align: middle !important;
+    }
+
+    /* 4. Elimina lo spazio bianco in alto che rimane dopo aver tolto l'header */
+    .main .block-container {
+        padding-top: 0rem !important;
+        margin-top: -5rem !important;
+    }
+
+    /* 5. Rende tutto lo sfondo uniforme per coprire eventuali residui */
+    .stApp {
+        background-color: white;
+    }
     </style>
     """, unsafe_allow_html=True)
 

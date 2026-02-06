@@ -6,7 +6,23 @@ from email.mime.multipart import MIMEMultipart
 import time
 
 # Configurazione Pagina
-st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
+import streamlit as st
+
+# QUESTO È IL COMANDO CRUCIALE:
+# Forza la sidebar a essere espansa e imposta il layout
+st.set_page_config(
+    page_title="Feel - Gestione Officina",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Rende la sidebar visibile anche su mobile con un po' di margine
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNav"] {display: none;}
+        .st-emotion-cache-16idsys p {font-size: 1.1rem;}
+    </style>
+""", unsafe_allow_html=True)
 
 
 # Codice per nascondere il menu e la barra superiore di Streamlit

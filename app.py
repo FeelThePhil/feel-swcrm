@@ -95,7 +95,7 @@ logo_url = "https://officinefiore.it/wp-content/uploads/2025/05/logo-fiore.svg"
 st.markdown(
     f"""
     <div style="text-align: center;">
-        <img src="{logo_url}" width="150">
+        <img src="{logo_url}" width="200">
     </div>
     """,
     unsafe_allow_html=True

@@ -53,20 +53,35 @@ import streamlit as st
 # Funzione per il controllo accesso
 def check_password():
     if "password_correct" not in st.session_state:
-        # Visualizza i campi di input al primo accesso
-        st.text_input("Username", key="username")
-        st.text_input("Password", type="password", key="password")
-        if st.button("Accedi"):
-            if (st.session_state["username"] == st.secrets["USER_LOGIN"] and 
-                st.session_state["password"] == st.secrets["USER_PASSWORD"]):
-                st.session_state["password_correct"] = True
-                st.rerun()
-            else:
-                st.error("Credenziali errate")
+        # Centriamo il contenuto per un'estetica impeccabile
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            # INSERISCI QUI IL TUO LINK
+            logo_url = "https://officinefiore.it/wp-content/uploads/2025/05/logo-fiore.svg" 
+            
+            # Usiamo HTML per visualizzare l'SVG in modo perfetto
+            st.markdown(
+                f'<div style="text-align: center;"><img src="{logo_url}" width="200"></div>', 
+                unsafe_allow_html=True
+            )
+            
+            st.title("Accesso Riservato Feel")
+            
+            # Campi di input
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            
+            if st.button("Entra"):
+                if (username == st.secrets["USER_LOGIN"] and 
+                    password == st.secrets["USER_PASSWORD"]):
+                    st.session_state["password_correct"] = True
+                    st.rerun()
+                else:
+                    st.error("Credenziali non valide")
         return False
     return True
 
-# Se la password non è corretta, ferma l'esecuzione qui
+# Applichiamo il blocco prima di tutto il resto
 if not check_password():
     st.stop()
 

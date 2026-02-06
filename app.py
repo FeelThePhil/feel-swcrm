@@ -10,7 +10,7 @@ st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
 
 # --- CREDENZIALI (Spostale qui) ---
 EMAIL_MITTENTE = "feel.swcrm@gmail.com"
-PASSWORD_APP = "nsal fqko nwff idue" 
+PASSWORD_APP = st.secrets["EMAIL_PASSWORD"] 
 
 # --- FUNZIONE INVIO EMAIL ---
 def invia_email(destinatario, oggetto, messaggio):

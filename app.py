@@ -9,42 +9,44 @@ import time
 st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
 
 # Codice per nascondere il menu e la barra superiore di Streamlit
+import streamlit.components.v1 as components
+
+# 1. CSS per nascondere header e menu (quello che già facevamo)
 st.markdown("""
     <style>
-    /* 1. Nasconde la barra superiore (Share, Star, Edit, GitHub) */
-    header[data-testid="stHeader"] {
-        display: none !important;
-    }
-    
-    /* 2. Nasconde il menu a tre puntini e i bottoni di deploy */
-    .stAppDeployButton, 
-    div[data-testid="stStatusWidget"], 
-    #MainMenu {
+    header[data-testid="stHeader"], .stAppDeployButton, #MainMenu, footer {
         display: none !important;
         visibility: hidden !important;
     }
-
-    /* 3. Nasconde la toolbar in basso a destra e il badge "Hosted with Streamlit" */
-    [data-testid="stToolbar"], 
-    footer, 
-    #viewerBadge, 
-    .st-emotion-cache-zq59as {
-        display: none !important;
-        vertical-align: middle !important;
-    }
-
-    /* 4. Elimina lo spazio bianco in alto che rimane dopo aver tolto l'header */
+    /* Rimuove lo spazio bianco in alto */
     .main .block-container {
         padding-top: 0rem !important;
-        margin-top: -5rem !important;
-    }
-
-    /* 5. Rende tutto lo sfondo uniforme per coprire eventuali residui */
-    .stApp {
-        background-color: white;
     }
     </style>
     """, unsafe_allow_html=True)
+
+# 2. JAVASCRIPT per eliminare le icone in basso (GitHub e Streamlit Badge)
+components.html(
+    """
+    <script>
+    const removeElements = () => {
+        // Cerca i badge e la toolbar in basso
+        const badges = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], [data-testid="stToolbar"], #viewerBadge');
+        badges.forEach(el => el.style.display = 'none');
+        
+        // Cerca specificamente le icone di GitHub e Hosted
+        const toolbar = window.parent.document.querySelector('div[data-testid="stToolbar"]');
+        if (toolbar) toolbar.style.display = 'none';
+    };
+    
+    // Esegue il comando subito e poi ogni secondo per sicurezza
+    removeElements();
+    setInterval(removeElements, 1000);
+    </script>
+    """,
+    height=0,
+    width=0,
+)
 
 # --- CREDENZIALI (Spostale qui) ---
 EMAIL_MITTENTE = "feel.swcrm@gmail.com"

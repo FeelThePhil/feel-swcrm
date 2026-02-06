@@ -7,6 +7,7 @@ import time
 
 # Configurazione Pagina
 st.set_page_config(page_title="Feel - CRM Officina", layout="wide")
+st.set_page_config(initial_sidebar_state="expanded")
 
 # Codice per nascondere il menu e la barra superiore di Streamlit
 import streamlit.components.v1 as components

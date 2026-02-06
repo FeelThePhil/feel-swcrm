@@ -48,6 +48,32 @@ components.html(
     width=0,
 )
 
+import streamlit as st
+
+# Funzione per il controllo accesso
+def check_password():
+    if "password_correct" not in st.session_state:
+        # Visualizza i campi di input al primo accesso
+        st.text_input("Username", key="username")
+        st.text_input("Password", type="password", key="password")
+        if st.button("Accedi"):
+            if (st.session_state["username"] == st.secrets["USER_LOGIN"] and 
+                st.session_state["password"] == st.secrets["USER_PASSWORD"]):
+                st.session_state["password_correct"] = True
+                st.rerun()
+            else:
+                st.error("Credenziali errate")
+        return False
+    return True
+
+# Se la password non è corretta, ferma l'esecuzione qui
+if not check_password():
+    st.stop()
+
+# --- DA QUI IN POI INCOMA IL TUO CODICE ATTUALE (IL CUORE DI FEEL) ---
+st.title("Benvenuto nel cuore di Feel")
+# ... tutto il resto del tuo codice ...
+
 # --- CREDENZIALI (Spostale qui) ---
 EMAIL_MITTENTE = "feel.swcrm@gmail.com"
 PASSWORD_APP = st.secrets["EMAIL_PASSWORD"] 

@@ -90,6 +90,16 @@ if not check_password():
     st.stop()
 
 # --- DA QUI IN POI INCOMA IL TUO CODICE ATTUALE (IL CUORE DI FEEL) ---
+logo_url = "https://officinefiore.it/wp-content/uploads/2025/05/logo-fiore.svg" 
+
+st.markdown(
+    f"""
+    <div style="text-align: center;">
+        <img src="{logo_url}" width="150">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 st.title("Benvenuto nel cuore di Feel")
 # ... tutto il resto del tuo codice ...
 

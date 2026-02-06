@@ -19,6 +19,7 @@ def invia_email(destinatario, oggetto, messaggio):
         msg['From'] = EMAIL_MITTENTE
         msg['To'] = destinatario
         msg['Subject'] = oggetto
+        msg.add_header('reply-to', 'tua-mail-personale@esempio.it')
         msg.attach(MIMEText(messaggio, 'plain'))
         
         server = smtplib.SMTP('smtp.gmail.com', 587)

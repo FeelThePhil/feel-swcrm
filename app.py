@@ -166,7 +166,7 @@ if file_caricato:
 
     # 3. Anteprima e Invio
     st.write("### 📋 Lista Lead Rilevati")
-    st.dataframe(df.head()) # Mostra i primi 5 per controllo
+    st.dataframe(df_lavoro, use_container_width=True, height=400)
 
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
         progresso = st.progress(0)

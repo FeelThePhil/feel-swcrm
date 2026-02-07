@@ -204,29 +204,28 @@ if file_caricato:
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
-    if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_report"):
-        progresso = st.progress(0.0) # Inizializziamo a float
+ if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
+        progresso = st.progress(0.0)
         status_text = st.empty()
         
         risultati_campagna = [] 
         successi = 0
-        totale_righe = len(df)
+        totale = len(df)
         
-        # Usiamo enumerate per avere un indice pulito (0, 1, 2...) indipendentemente dall'Excel
         for idx, (i, riga) in enumerate(df.iterrows()):
             nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
-            email_cliente = riga['email'] if 'email' in riga else None
+            email_cliente = str(riga['email']).strip() if 'email' in riga else ""
             targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
             tipo_veicolo = str(riga['tipo']) if 'tipo' in riga else "veicolo"
             
-            # Gestione data per il messaggio
             try:
                 data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y')
             except:
                 data_ultima = "N.D."
             
+            # Validazione base: l'email deve contenere @ e .
             stato_invio = "❌ Fallito"
-            if email_cliente and str(email_cliente).strip() != "nan":
+            if "@" in email_cliente and "." in email_cliente:
                 messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente)\
                                                      .replace("[Targa]", targa_veicolo)\
                                                      .replace("[Tipo]", tipo_veicolo)\
@@ -236,7 +235,7 @@ if file_caricato:
                     successi += 1
                     stato_invio = "✅ Inviata"
             else:
-                stato_invio = "⚠️ Email Mancante"
+                stato_invio = "⚠️ Email Errata/Mancante"
 
             risultati_campagna.append({
                 "Cliente": nome_cliente,
@@ -246,35 +245,39 @@ if file_caricato:
                 "Orario": datetime.now().strftime("%H:%M:%S")
             })
             
-            # CALCOLO PERCENTUALE CORRETTO
-            # Usiamo idx (il contatore del ciclo) invece di i (l'indice della riga Excel)
-            percentuale = min((idx + 1) / totale_righe, 1.0)
+            # CORREZIONE BARRA PROGRESSO (Screenshot 2)
+            percentuale = min((idx + 1) / totale, 1.0)
             progresso.progress(percentuale)
-            status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({idx+1}/{totale_righe})")
+            status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({idx+1}/{totale})")
             time.sleep(1)
 
-        st.success(f"✅ Campagna completata! Successi: {successi} su {totale_righe}")
+        st.success(f"✅ Campagna completata! Successi: {successi} su {totale}")
         
-        # Generazione Excel in memoria
+        # --- GENERAZIONE REPORT (Corretta per Screenshot 3) ---
         df_report = pd.DataFrame(risultati_campagna)
         
-        # Tabella veloce degli errori a schermo
+        # Mostra tabella errori solo se esistono
         errori = df_report[df_report["Esito"] != "✅ Inviata"]
         if not errori.empty:
-            st.warning(f"Ci sono stati {len(errori)} problemi durante l'invio.")
+            st.warning(f"Attenzione: {len(errori)} invii non sono andati a buon fine.")
             st.dataframe(errori)
 
-        # Creazione del file Excel per il download
-        buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-            df_report.to_excel(writer, index=False, sheet_name='Report_Invio')
-        
-        st.download_button(
-            label="📥 Scarica Report Completo (Excel)",
-            data=buffer.getvalue(),
-            file_name=f"Report_Invio_{datetime.now().strftime('%d_%m_%Y')}.xlsx",
-            mime="application/vnd.ms-excel"
-        )
+        # Generazione file Excel
+        try:
+            import io
+            buffer = io.BytesIO()
+            # Se xlsxwriter manca, questo darà un errore chiaro a schermo
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                df_report.to_excel(writer, index=False, sheet_name='Report')
+            
+            st.download_button(
+                label="📥 Scarica Report Esiti (Excel)",
+                data=buffer.getvalue(),
+                file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx",
+                mime="application/vnd.ms-excel"
+            )
+        except ImportError:
+            st.error("Errore: Libreria 'xlsxwriter' non installata. Il report non può essere generato.")
 
 else:
     st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")

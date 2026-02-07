@@ -4,7 +4,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
-from dateutil.relativedelta import relativedelta
 
 st.set_page_config(
     page_title="Feel - Gestione Officina",

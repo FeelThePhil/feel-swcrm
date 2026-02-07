@@ -166,6 +166,28 @@ file_caricato = st.sidebar.file_uploader("Carica Excel Lead per questa campagna"
 if file_caricato:
     df = pd.read_excel(file_caricato)
     df.columns = df.columns.str.strip().str.lower()
+
+    # --- LOGICA PIGNOLA SOLO PER REVISIONE ---
+    if tipo_campagna == "Revisione":
+        if 'ultima_revisione' in df.columns:
+            from datetime import datetime
+            from dateutil.relativedelta import relativedelta
+            
+            # Convertiamo la colonna in formato data
+            df['ultima_revisione'] = pd.to_datetime(df['ultima_revisione'])
+            
+            # Calcoliamo il mese target: Oggi (Febbraio) + 1 mese = Marzo
+            oggi = datetime.now()
+            mese_target = (oggi + relativedelta(months=1)).month
+            
+            # FILTRO: Prendiamo tutti quelli che hanno fatto la revisione nel mese target, 
+            # a prescindere dall'anno (così becchiamo le scadenze cicliche)
+            df = df[df['ultima_revisione'].dt.month == mese_target].copy()
+            
+            st.success(f"🎯 Filtro Revisioni: Estratti {len(df)} veicoli che scadono nel mese {mese_target}")
+        else:
+            st.error("Attenzione: Per la campagna Revisione serve la colonna 'ultima_revisione' nell'Excel.")
+            st.stop() # Blocca l'invio se mancano i dati fondamentali
     
     # 3. Anteprima e Invio
     st.write("### 📋 Lista Lead Pronti per l'invio")

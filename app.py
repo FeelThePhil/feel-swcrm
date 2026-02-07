@@ -238,26 +238,5 @@ if file_caricato:
 
         st.success(f"✅ Campagna completata! Inviate con successo {successi} email.")
 
-    if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
-        progresso = st.progress(0)
-        status_text = st.empty()
-        successi = 0
-        
-        for i, riga in df.iterrows():
-            nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
-            email_cliente = riga['email'] if 'email' in riga else None
-            targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
-            
-            if email_cliente:
-                messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente).replace("[Targa]", targa_veicolo)
-                risultato = invia_email(email_cliente, oggetto, messaggio_personalizzato)
-                if risultato: successi += 1
-            
-            percentuale = (i + 1) / len(df)
-            progresso.progress(percentuale)
-            status_text.text(f"Inviando a {email_cliente}... ({i+1}/{len(df)})")
-            time.sleep(1)
-
-        st.success(f"✅ Campagna completata! Inviate {successi} su {len(df)} email.")
 else:
     st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")

@@ -200,21 +200,20 @@ if file_caricato:
             st.error("Attenzione: Per la campagna Revisione serve la colonna 'ultima_revisione' nell'Excel.")
             st.stop() # Blocca l'invio se mancano i dati fondamentali
     
-    # 3. Anteprima e Invio
+   # 3. Anteprima e Invio
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
-    # ... (sopra c'è la tabella st.dataframe)
-
-    # SOSTITUISCI DA QUI
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_report"):
-        progresso = st.progress(0)
+        progresso = st.progress(0.0) # Inizializziamo a float
         status_text = st.empty()
         
         risultati_campagna = [] 
         successi = 0
+        totale_righe = len(df)
         
-        for i, riga in df.iterrows():
+        # Usiamo enumerate per avere un indice pulito (0, 1, 2...) indipendentemente dall'Excel
+        for idx, (i, riga) in enumerate(df.iterrows()):
             nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
             email_cliente = riga['email'] if 'email' in riga else None
             targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
@@ -247,12 +246,14 @@ if file_caricato:
                 "Orario": datetime.now().strftime("%H:%M:%S")
             })
             
-            percentuale = (i + 1) / len(df)
+            # CALCOLO PERCENTUALE CORRETTO
+            # Usiamo idx (il contatore del ciclo) invece di i (l'indice della riga Excel)
+            percentuale = min((idx + 1) / totale_righe, 1.0)
             progresso.progress(percentuale)
-            status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({i+1}/{len(df)})")
+            status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({idx+1}/{totale_righe})")
             time.sleep(1)
 
-        st.success(f"✅ Campagna completata! Successi: {successi} su {len(df)}")
+        st.success(f"✅ Campagna completata! Successi: {successi} su {totale_righe}")
         
         # Generazione Excel in memoria
         df_report = pd.DataFrame(risultati_campagna)
@@ -274,8 +275,6 @@ if file_caricato:
             file_name=f"Report_Invio_{datetime.now().strftime('%d_%m_%Y')}.xlsx",
             mime="application/vnd.ms-excel"
         )
-    # A QUI
-    
-        
+
 else:
     st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")

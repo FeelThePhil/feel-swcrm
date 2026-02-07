@@ -137,6 +137,9 @@ file_caricato = st.sidebar.file_uploader("Carica Excel Lead", type=['xlsx'])
 if file_caricato:
     df = pd.read_excel(file_caricato)
     
+    # PULIZIA PIGNOLA: trasformiamo i nomi colonne in minuscolo per non sbagliare
+    df.columns = df.columns.str.strip().str.lower()
+    
     # 2. Selezione Campagna
     st.subheader("🚀 Configura Campagna")
     col1, col2 = st.columns(2)
@@ -148,25 +151,24 @@ if file_caricato:
     # Logica dei testi preimpostati
     if tipo_campagna == "Revisione":
         oggetto_default = "⚠️ Scadenza Revisione imminente - Officina"
-        testo_default = "Ciao [Nome],\nti ricordiamo che la revisione della tua auto è in scadenza questo mese.\n\nContattaci al più presto per fissare un appuntamento ed evitare sanzioni.\n\nA presto!"
-    
+        testo_default = "Ciao [Nome],\nti ricordiamo che la revisione della tua auto è in scadenza questo mese.\n\nContattaci al più presto per fissare un appuntamento.\n\nA presto!"
     elif tipo_campagna == "Follow-up Post Intervento":
         oggetto_default = "Tutto bene con la tua auto?"
-        testo_default = "Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento. Volevamo assicurarci che tutto sia perfetto e che tu sia soddisfatto del lavoro svolto.\n\nPer qualsiasi cosa, siamo a tua disposizione!"
-    
-    else: # Comunicazione Generica
+        testo_default = "Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento. Volevamo assicurarci che tutto sia perfetto.\n\nA disposizione!"
+    else:
         oggetto_default = "Novità dall'Officina"
-        testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità e promozioni dedicate alla cura della tua auto.\n\nPassa a trovarci!"
+        testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità. Passa a trovarci!"
 
     with col2:
         oggetto = st.text_input("Oggetto Email", oggetto_default)
 
     corpo_mail = st.text_area("Messaggio (usa [Nome] per personalizzare)", testo_default, height=180)
-    
 
     # 3. Anteprima e Invio
     st.write("### 📋 Lista Lead Rilevati")
-    st.dataframe(df_lavoro, use_container_width=True, height=400)
+    
+    # ERRORE RISOLTO: Usiamo 'df' e impostiamo l'altezza per vederne 10
+    st.dataframe(df, use_container_width=True, height=400) 
 
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
         progresso = st.progress(0)
@@ -174,21 +176,24 @@ if file_caricato:
         successi = 0
         
         for i, riga in df.iterrows():
-            # Personalizza il messaggio col nome
-            messaggio_personalizzato = corpo_mail.replace("[Nome]", str(riga['Nome']))
+            # USIAMO I NOMI COLONNE MINUSCOLI ('nome', 'email')
+            # Assicurati che il tuo Excel abbia queste colonne
+            nome_cliente = riga['nome'] if 'nome' in riga else "Cliente"
+            email_cliente = riga['email'] if 'email' in riga else None
             
-            # Invio reale
-            risultato = invia_email(riga['Email'], oggetto, messaggio_personalizzato)
-            
-            if risultato:
-                successi += 1
+            if email_cliente:
+                messaggio_personalizzato = corpo_mail.replace("[Nome]", str(nome_cliente))
+                
+                # Invio reale
+                risultato = invia_email(email_cliente, oggetto, messaggio_personalizzato)
+                
+                if risultato:
+                    successi += 1
             
             # Aggiorna barra progresso
             percentuale = (i + 1) / len(df)
             progresso.progress(percentuale)
-            status_text.text(f"Inviando a {riga['Email']}... ({i+1}/{len(df)})")
-            time.sleep(1) # Piccola pausa per evitare spam filter
+            status_text.text(f"Inviando a {email_cliente}... ({i+1}/{len(df)})")
+            time.sleep(1)
 
         st.success(f"✅ Campagna completata! Inviate con successo {successi} su {len(df)} email.")
-else:
-    st.info("Per iniziare, carica il file Excel dei tuoi lead dalla barra laterale sinistra.")

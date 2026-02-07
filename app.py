@@ -145,16 +145,16 @@ with col1:
 
 # Logica dei testi preimpostati (si aggiornano subito)
 if tipo_campagna == "Revisione":
-    oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officina Fiore"
+    oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officine Fiore"
     # Messaggio in corretto italiano con tutti i campi richiesti
     testo_default = (
         "Gentile [Nome],\n\n"
         "da un controllo nei nostri archivi, le ricordiamo che il Suo veicolo [Tipo] "
         "targato [Targa] ha la revisione in scadenza entro la fine del mese prossimo.\n\n"
         "Considerando che l'ultimo intervento risulta effettuato in data [Data_Ultima], "
-        "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitare sanzioni.\n\n"
+        "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitando sanzioni e fermi macchina.\n\n"
         "Restiamo a Sua completa disposizione.\n\n"
-        "Cordiali saluti,\nOfficina Fiore"
+        "Cordiali saluti,\nOfficine Fiore"
     )
 elif tipo_campagna == "Follow-up Post Intervento":
     oggetto_default = "Tutto bene con la tua auto?"

@@ -136,36 +136,9 @@ st.sidebar.header("📂 Carica Dati")
 file_caricato = st.sidebar.file_uploader("Carica Excel Lead", type=['xlsx'])
 
 if file_caricato:
-    # --- TUTTO QUESTO BLOCCO DEVE ESSERE RIENTRATO (TAB) ---
     df = pd.read_excel(file_caricato)
     
-    # Pulizia nomi colonne per evitare errori di battitura
-    df.columns = df.columns.str.strip().str.lower()
     
-    # LOGICA FILTRO PIGNOLO (Febbraio avvisa Marzo anno scorso)
-    if 'ultima_revisione' in df.columns:
-        from datetime import datetime
-        from dateutil.relativedelta import relativedelta
-        
-        df['ultima_revisione'] = pd.to_datetime(df['ultima_revisione'])
-        
-        # Calcolo date
-        oggi = datetime.now()
-        data_target = oggi + relativedelta(months=1)
-        mese_target = data_target.month
-        anno_scorso = data_target.year - 1
-        
-        # Filtriamo il database
-        df_lavoro = df[
-            (df['ultima_revisione'].dt.month == mese_target) & 
-            (df['ultima_revisione'].dt.year == anno_scorso)
-        ].copy()
-        
-        st.success(f"🎯 Filtro Attivo: Estratti {len(df_lavoro)} lead per la revisione di Marzo {anno_scorso}")
-    else:
-        st.warning("⚠️ Colonna 'ultima_revisione' non trovata. Uso tutto il database.")
-        df_lavoro = df
-
     # 2. Selezione Campagna
     st.subheader("🚀 Configura Campagna")
     col1, col2 = st.columns(2)

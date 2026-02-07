@@ -114,6 +114,7 @@ def invia_email(destinatario, oggetto, messaggio):
         msg['From'] = EMAIL_MITTENTE
         msg['To'] = destinatario
         msg['Subject'] = oggetto
+        msg['Reply-To'] = "segreteria@officinefiore.it"
         
         msg.attach(MIMEText(messaggio, 'plain'))
         

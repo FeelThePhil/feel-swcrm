@@ -204,7 +204,7 @@ if file_caricato:
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
-     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
+    if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
         progresso = st.progress(0.0)
         status_text = st.empty()
         
@@ -245,7 +245,7 @@ if file_caricato:
                 "Orario": datetime.now().strftime("%H:%M:%S")
             })
             
-            # CORREZIONE BARRA PROGRESSO (Screenshot 2)
+            # Aggiornamento barra progresso
             percentuale = min((idx + 1) / totale, 1.0)
             progresso.progress(percentuale)
             status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({idx+1}/{totale})")
@@ -253,20 +253,17 @@ if file_caricato:
 
         st.success(f"✅ Campagna completata! Successi: {successi} su {totale}")
         
-        # --- GENERAZIONE REPORT (Corretta per Screenshot 3) ---
+        # --- GENERAZIONE REPORT ---
         df_report = pd.DataFrame(risultati_campagna)
         
-        # Mostra tabella errori solo se esistono
         errori = df_report[df_report["Esito"] != "✅ Inviata"]
         if not errori.empty:
             st.warning(f"Attenzione: {len(errori)} invii non sono andati a buon fine.")
             st.dataframe(errori)
 
-        # Generazione file Excel
         try:
             import io
             buffer = io.BytesIO()
-            # Se xlsxwriter manca, questo darà un errore chiaro a schermo
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
                 df_report.to_excel(writer, index=False, sheet_name='Report')
             
@@ -276,8 +273,8 @@ if file_caricato:
                 file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx",
                 mime="application/vnd.ms-excel"
             )
-        except ImportError:
-            st.error("Errore: Libreria 'xlsxwriter' non installata. Il report non può essere generato.")
+        except Exception as e:
+            st.error(f"Errore nella generazione del report: {e}")
 
 else:
     st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")

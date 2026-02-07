@@ -143,8 +143,17 @@ with col1:
 
 # Logica dei testi preimpostati (si aggiornano subito)
 if tipo_campagna == "Revisione":
-    oggetto_default = "⚠️ Scadenza Revisione imminente - Officina"
-    testo_default = "Ciao [Nome],\nti ricordiamo che il tuo veicolo targato [Targa] ha la revisione in scadenza questo mese.\n\nContattaci al più presto per un appuntamento.\n\nA presto!"
+    oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officina Fiore"
+    # Messaggio in corretto italiano con tutti i campi richiesti
+    testo_default = (
+        "Gentile [Nome],\n\n"
+        "da un controllo nei nostri archivi, le ricordiamo che il Suo veicolo [Tipo] "
+        "targato [Targa] ha la revisione in scadenza entro la fine del mese prossimo.\n\n"
+        "Considerando che l'ultimo intervento risulta effettuato in data [Data_Ultima], "
+        "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitare sanzioni.\n\n"
+        "Restiamo a Sua completa disposizione.\n\n"
+        "Cordiali saluti,\nOfficina Fiore"
+    )
 elif tipo_campagna == "Follow-up Post Intervento":
     oggetto_default = "Tutto bene con la tua auto?"
     testo_default = "Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento sulla tua auto [Targa]. Volevamo assicurarci che tu sia soddisfatto.\n\nA disposizione!"
@@ -192,6 +201,41 @@ if file_caricato:
     # 3. Anteprima e Invio
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
+
+    if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
+        progresso = st.progress(0)
+        status_text = st.empty()
+        successi = 0
+        
+        for i, riga in df.iterrows():
+            # Recupero dati (i nomi sono minuscoli perché li abbiamo puliti prima)
+            nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
+            email_cliente = riga['email'] if 'email' in riga else None
+            targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
+            tipo_veicolo = str(riga['tipo']) if 'tipo' in riga else "veicolo"
+            
+            # Formattiamo la data dell'ultima revisione per renderla leggibile (GG/MM/AAAA)
+            data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y') if 'ultima_revisione' in riga else "N.D."
+            
+            if email_cliente:
+                # SOSTITUZIONI MULTIPLE
+                messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente)
+                messaggio_personalizzato = messaggio_personalizzato.replace("[Targa]", targa_veicolo)
+                messaggio_personalizzato = messaggio_personalizzato.replace("[Tipo]", tipo_veicolo)
+                messaggio_personalizzato = messaggio_personalizzato.replace("[Data_Ultima]", data_ultima)
+                
+                # Invio reale
+                risultato = invia_email(email_cliente, oggetto, messaggio_personalizzato)
+                if risultato:
+                    successi += 1
+            
+            # Aggiornamento progresso
+            percentuale = (i + 1) / len(df)
+            progresso.progress(percentuale)
+            status_text.text(f"Inviando a {email_cliente}... ({i+1}/{len(df)})")
+            time.sleep(1)
+
+        st.success(f"✅ Campagna completata! Inviate con successo {successi} email.")
 
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
         progresso = st.progress(0)

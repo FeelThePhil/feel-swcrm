@@ -4,6 +4,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
+from dateutil.relativedelta import relativedelta
 
 st.set_page_config(
     page_title="Feel - Gestione Officina",
@@ -135,7 +136,35 @@ st.sidebar.header("📂 Carica Dati")
 file_caricato = st.sidebar.file_uploader("Carica Excel Lead", type=['xlsx'])
 
 if file_caricato:
+    if file_caricato:
     df = pd.read_excel(file_caricato)
+    
+    # --- NUOVO PEZZO: LOGICA FILTRO MARZO (Pignolo) ---
+    # Pulizia nomi colonne
+    df.columns = df.columns.str.strip().str.lower()
+    
+    if 'ultima_revisione' in df.columns:
+        df['ultima_revisione'] = pd.to_datetime(df['ultima_revisione'])
+        
+        # Calcolo: Oggi è Febbraio, il target è Marzo dell'anno scorso
+        oggi = datetime.now()
+        data_target = oggi + relativedelta(months=1)
+        mese_target = data_target.month
+        anno_scorso = data_target.year - 1
+        
+        # Applichiamo il filtro
+        df_filtrato = df[
+            (df['ultima_revisione'].dt.month == mese_target) & 
+            (df['ultima_revisione'].dt.year == anno_scorso)
+        ].copy()
+        
+        st.success(f"🔍 Filtro Automatico: Estratti {len(df_filtrato)} lead che hanno fatto la revisione a Marzo {anno_scorso}")
+        
+        # Usiamo il dataframe filtrato per la campagna
+        df_lavoro = df_filtrato
+    else:
+        st.warning("Colonna 'ultima_revisione' non trovata. Uso tutto il database.")
+        df_lavoro = df
     
     # 2. Selezione Campagna
     st.subheader("🚀 Configura Campagna")

@@ -203,40 +203,78 @@ if file_caricato:
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
-    if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
+    # ... (sopra c'è la tabella st.dataframe)
+
+    # SOSTITUISCI DA QUI
+    if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_report"):
         progresso = st.progress(0)
         status_text = st.empty()
+        
+        risultati_campagna = [] 
         successi = 0
         
         for i, riga in df.iterrows():
-            # Recupero dati (i nomi sono minuscoli perché li abbiamo puliti prima)
             nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
             email_cliente = riga['email'] if 'email' in riga else None
             targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
             tipo_veicolo = str(riga['tipo']) if 'tipo' in riga else "veicolo"
             
-            # Formattiamo la data dell'ultima revisione per renderla leggibile (GG/MM/AAAA)
-            data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y') if 'ultima_revisione' in riga else "N.D."
+            # Gestione data per il messaggio
+            try:
+                data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y')
+            except:
+                data_ultima = "N.D."
             
-            if email_cliente:
-                # SOSTITUZIONI MULTIPLE
-                messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente)
-                messaggio_personalizzato = messaggio_personalizzato.replace("[Targa]", targa_veicolo)
-                messaggio_personalizzato = messaggio_personalizzato.replace("[Tipo]", tipo_veicolo)
-                messaggio_personalizzato = messaggio_personalizzato.replace("[Data_Ultima]", data_ultima)
+            stato_invio = "❌ Fallito"
+            if email_cliente and str(email_cliente).strip() != "nan":
+                messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente)\
+                                                     .replace("[Targa]", targa_veicolo)\
+                                                     .replace("[Tipo]", tipo_veicolo)\
+                                                     .replace("[Data_Ultima]", data_ultima)
                 
-                # Invio reale
-                risultato = invia_email(email_cliente, oggetto, messaggio_personalizzato)
-                if risultato:
+                if invia_email(email_cliente, oggetto, messaggio_personalizzato):
                     successi += 1
+                    stato_invio = "✅ Inviata"
+            else:
+                stato_invio = "⚠️ Email Mancante"
+
+            risultati_campagna.append({
+                "Cliente": nome_cliente,
+                "Email": email_cliente,
+                "Targa": targa_veicolo,
+                "Esito": stato_invio,
+                "Orario": datetime.now().strftime("%H:%M:%S")
+            })
             
-            # Aggiornamento progresso
             percentuale = (i + 1) / len(df)
             progresso.progress(percentuale)
-            status_text.text(f"Inviando a {email_cliente}... ({i+1}/{len(df)})")
+            status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({i+1}/{len(df)})")
             time.sleep(1)
 
-        st.success(f"✅ Campagna completata! Inviate con successo {successi} email.")
+        st.success(f"✅ Campagna completata! Successi: {successi} su {len(df)}")
+        
+        # Generazione Excel in memoria
+        df_report = pd.DataFrame(risultati_campagna)
+        
+        # Tabella veloce degli errori a schermo
+        errori = df_report[df_report["Esito"] != "✅ Inviata"]
+        if not errori.empty:
+            st.warning(f"Ci sono stati {len(errori)} problemi durante l'invio.")
+            st.dataframe(errori)
 
+        # Creazione del file Excel per il download
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            df_report.to_excel(writer, index=False, sheet_name='Report_Invio')
+        
+        st.download_button(
+            label="📥 Scarica Report Completo (Excel)",
+            data=buffer.getvalue(),
+            file_name=f"Report_Invio_{datetime.now().strftime('%d_%m_%Y')}.xlsx",
+            mime="application/vnd.ms-excel"
+        )
+    # A QUI
+    
+        
 else:
     st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")

@@ -137,18 +137,6 @@ file_caricato = st.sidebar.file_uploader("Carica Excel Lead", type=['xlsx'])
 if file_caricato:
     df = pd.read_excel(file_caricato)
     
-    
-    # 2. Selezione Campagna
-    st.subheader("🚀 Configura Campagna")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        tipo_campagna = st.selectbox("Seleziona il tipo di invio", 
-                                    ["Revisione", "Follow-up Post Intervento", "Comunicazione Generica"])
-    
-    # ... da qui prosegui con il resto del tuo codice originale ...
-    # Ricorda solo di usare 'df_lavoro' invece di 'df' per i calcoli successivi!
-    
     # 2. Selezione Campagna
     st.subheader("🚀 Configura Campagna")
     col1, col2 = st.columns(2)

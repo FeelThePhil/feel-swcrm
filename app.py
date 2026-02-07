@@ -126,48 +126,49 @@ def invia_email(destinatario, oggetto, messaggio):
     except:
         return False
 
-# --- INTERFACCIA ---
+# --- NUOVA INTERFACCIA ORDINATA ---
 st.title("🛡️ Feel - Gestione Lead & Comunicazioni")
 st.markdown("---")
 
-# 1. Caricamento Database
+# 1. SELEZIONE CAMPAGNA (Spostata PRIMA del caricamento)
+st.subheader("🚀 1. Scegli la Campagna")
+col1, col2 = st.columns(2)
+
+with col1:
+    tipo_campagna = st.selectbox(
+        "Cosa vuoi fare oggi?", 
+        ["Revisione", "Follow-up Post Intervento", "Comunicazione Generica"],
+        key="selezione_tipo_campagna"
+    )
+
+# Logica dei testi preimpostati (si aggiornano subito)
+if tipo_campagna == "Revisione":
+    oggetto_default = "⚠️ Scadenza Revisione imminente - Officina"
+    testo_default = "Ciao [Nome],\nti ricordiamo che il tuo veicolo targato [Targa] ha la revisione in scadenza questo mese.\n\nContattaci al più presto per un appuntamento.\n\nA presto!"
+elif tipo_campagna == "Follow-up Post Intervento":
+    oggetto_default = "Tutto bene con la tua auto?"
+    testo_default = "Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento sulla tua auto [Targa]. Volevamo assicurarci che tu sia soddisfatto.\n\nA disposizione!"
+else:
+    oggetto_default = "Novità dall'Officina"
+    testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità per la tua auto [Targa]. Passa a trovarci!"
+
+with col2:
+    oggetto = st.text_input("Oggetto Email", oggetto_default)
+
+corpo_mail = st.text_area("Personalizza il messaggio (usa [Nome] e [Targa])", testo_default, height=180)
+
+st.markdown("---")
+
+# 2. CARICAMENTO DATI (Solo dopo aver deciso la campagna)
 st.sidebar.header("📂 Carica Dati")
-file_caricato = st.sidebar.file_uploader("Carica Excel Lead", type=['xlsx'])
+file_caricato = st.sidebar.file_uploader("Carica Excel Lead per questa campagna", type=['xlsx'])
 
 if file_caricato:
     df = pd.read_excel(file_caricato)
-    
-    # PULIZIA PIGNOLA: trasformiamo i nomi colonne in minuscolo per non sbagliare
     df.columns = df.columns.str.strip().str.lower()
     
-    # 2. Selezione Campagna
-    st.subheader("🚀 Configura Campagna")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        tipo_campagna = st.selectbox("Seleziona il tipo di invio", 
-                                    ["Revisione", "Follow-up Post Intervento", "Comunicazione Generica"])
-    
-    # Logica dei testi preimpostati
-    if tipo_campagna == "Revisione":
-        oggetto_default = "⚠️ Scadenza Revisione imminente - Officina"
-        testo_default = "Ciao [Nome],\nti ricordiamo che la revisione della tua auto è in scadenza questo mese.\n\nContattaci al più presto per fissare un appuntamento.\n\nA presto!"
-    elif tipo_campagna == "Follow-up Post Intervento":
-        oggetto_default = "Tutto bene con la tua auto?"
-        testo_default = "Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento. Volevamo assicurarci che tutto sia perfetto.\n\nA disposizione!"
-    else:
-        oggetto_default = "Novità dall'Officina"
-        testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità. Passa a trovarci!"
-
-    with col2:
-        oggetto = st.text_input("Oggetto Email", oggetto_default)
-
-    corpo_mail = st.text_area("Messaggio (usa [Nome] per personalizzare)", testo_default, height=180)
-
     # 3. Anteprima e Invio
-    st.write("### 📋 Lista Lead Rilevati")
-    
-    # ERRORE RISOLTO: Usiamo 'df' e impostiamo l'altezza per vederne 10
+    st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)"):
@@ -176,24 +177,20 @@ if file_caricato:
         successi = 0
         
         for i, riga in df.iterrows():
-            # USIAMO I NOMI COLONNE MINUSCOLI ('nome', 'email')
-            # Assicurati che il tuo Excel abbia queste colonne
-            nome_cliente = riga['nome'] if 'nome' in riga else "Cliente"
+            nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
             email_cliente = riga['email'] if 'email' in riga else None
+            targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
             
             if email_cliente:
-                messaggio_personalizzato = corpo_mail.replace("[Nome]", str(nome_cliente))
-                
-                # Invio reale
+                messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente).replace("[Targa]", targa_veicolo)
                 risultato = invia_email(email_cliente, oggetto, messaggio_personalizzato)
-                
-                if risultato:
-                    successi += 1
+                if risultato: successi += 1
             
-            # Aggiorna barra progresso
             percentuale = (i + 1) / len(df)
             progresso.progress(percentuale)
             status_text.text(f"Inviando a {email_cliente}... ({i+1}/{len(df)})")
             time.sleep(1)
 
-        st.success(f"✅ Campagna completata! Inviate con successo {successi} su {len(df)} email.")
+        st.success(f"✅ Campagna completata! Inviate {successi} su {len(df)} email.")
+else:
+    st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")

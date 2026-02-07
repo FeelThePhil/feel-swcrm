@@ -204,7 +204,7 @@ if file_caricato:
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
- if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
+     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
         progresso = st.progress(0.0)
         status_text = st.empty()
         

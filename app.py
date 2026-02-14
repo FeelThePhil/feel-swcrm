@@ -273,7 +273,7 @@ if file_caricato:
                 data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y')
             except:
                 data_ultima = "N.D."
-                
+              # --- INIZIO NUOVO PEZZO: CONTROLLO ANTI-DUPLICATO ---  
             gia_inviato = False
             if tipo_campagna == "Follow-up Post Intervento":
                 if verifica_duplicato_followup(email_cliente) or verifica_duplicato_followup(targa_veicolo):
@@ -289,6 +289,7 @@ if file_caricato:
                     "Orario": datetime.now().strftime("%H:%M:%S")
                 })
                 continue # Salta tutto il resto e passa al prossimo cliente
+                # --- FINE NUOVO PEZZO: CONTROLLO ANTI-DUPLICATO ---
             
             # Validazione base: l'email deve contenere @ e .
             stato_invio = "❌ Fallito"
@@ -301,6 +302,8 @@ if file_caricato:
                 if invia_email(email_cliente, oggetto, messaggio_personalizzato):
                     successi += 1
                     stato_invio = "✅ Inviata"
+                    # --- REGISTRAZIONE NELLO STORICO ---
+                    registra_invio_storico(email_cliente, targa_veicolo, tipo_campagna)
             else:
                 stato_invio = "⚠️ Email Errata/Mancante"
 

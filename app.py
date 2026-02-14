@@ -273,6 +273,22 @@ if file_caricato:
                 data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y')
             except:
                 data_ultima = "N.D."
+                
+            gia_inviato = False
+            if tipo_campagna == "Follow-up Post Intervento":
+                if verifica_duplicato_followup(email_cliente) or verifica_duplicato_followup(targa_veicolo):
+                    gia_inviato = True
+
+            if gia_inviato:
+                stato_invio = "⏭️ Saltato (Già inviato <14gg)"
+                risultati_campagna.append({
+                    "Cliente": nome_cliente,
+                    "Email": email_cliente,
+                    "Targa": targa_veicolo,
+                    "Esito": stato_invio,
+                    "Orario": datetime.now().strftime("%H:%M:%S")
+                })
+                continue # Salta tutto il resto e passa al prossimo cliente
             
             # Validazione base: l'email deve contenere @ e .
             stato_invio = "❌ Fallito"

@@ -143,7 +143,6 @@ def get_google_sheet():
         return None
 
 def verifica_duplicato_followup(identificativo):
-    """Questa funzione controlla se l'email o la targa sono già nel database"""
     sheet = get_google_sheet()
     if not sheet: return False
     try:
@@ -151,18 +150,29 @@ def verifica_duplicato_followup(identificativo):
         if not records: return False
         
         df_log = pd.DataFrame(records)
-        df_log['Data_Invio'] = pd.to_datetime(df_log['Data_Invio']).dt.date
+        # Rendiamo tutto minuscolo e senza spazi per non sbagliare
+        df_log.columns = df_log.columns.str.strip().str.lower()
+        
+        # Puliamo i dati nel foglio
+        df_log['email'] = df_log['email'].astype(str).str.strip().str.lower()
+        df_log['targa'] = df_log['targa'].astype(str).str.strip().str.upper()
+        
+        identificativo_pulito = str(identificativo).strip().lower()
+        
+        # Filtro 14 giorni
+        df_log['data_invio'] = pd.to_datetime(df_log['data_invio']).dt.date
         limite = (datetime.now() - timedelta(days=14)).date()
         
-        # Cerchiamo se esiste l'email o la targa contattata come 'Follow-up' negli ultimi 14gg
         duplicati = df_log[
-            ((df_log['email'] == str(identificativo)) | (df_log['targa'] == str(identificativo))) & 
-            (df_log['data_Invio'] > limite) &
-            (df_log['tipo_Campagna'] == 'Follow-up Post Intervento')
+            ((df_log['email'] == identificativo_pulito) | (df_log['targa'] == identificativo_pulito.upper())) & 
+            (df_log['data_invio'] > limite) &
+            (df_log['tipo_campagna'] == 'Follow-up Post Intervento')
         ]
         return not duplicati.empty
-    except:
+    except Exception as e:
+        st.error(f"Errore controllo duplicati: {e}")
         return False
+
 
 def registra_invio_storico(email, targa, tipo):
     """Questa funzione scrive i dati dell'invio sul foglio Google con messaggi di errore"""

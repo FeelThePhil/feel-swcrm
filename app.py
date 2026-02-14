@@ -136,8 +136,8 @@ def get_google_sheet():
     try:
         credentials = st.secrets["gcp_service_account"]
         gc = gspread.service_account_from_dict(credentials)
-        # Apre il file 'Feel_Storico_Invii' e il foglio chiamato 'Log'
-        sh = gc.open("Feel_Storico_Invii").worksheet("Log")
+        # Apre il file 'feel_storico_invii' e il foglio chiamato 'Log'
+        sh = gc.open("feel_storico_invii").worksheet("Log")
         return sh
     except:
         return None

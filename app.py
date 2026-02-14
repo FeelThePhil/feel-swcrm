@@ -156,9 +156,9 @@ def verifica_duplicato_followup(identificativo):
         
         # Cerchiamo se esiste l'email o la targa contattata come 'Follow-up' negli ultimi 14gg
         duplicati = df_log[
-            ((df_log['Email'] == str(identificativo)) | (df_log['Targa'] == str(identificativo))) & 
-            (df_log['Data_Invio'] > limite) &
-            (df_log['Tipo_Campagna'] == 'Follow-up Post Intervento')
+            ((df_log['email'] == str(identificativo)) | (df_log['targa'] == str(identificativo))) & 
+            (df_log['data_Invio'] > limite) &
+            (df_log['tipo_Campagna'] == 'Follow-up Post Intervento')
         ]
         return not duplicati.empty
     except:

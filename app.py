@@ -161,7 +161,7 @@ def verifica_duplicato_followup(identificativo):
         
         # Filtro 14 giorni
         df_log['data_invio'] = pd.to_datetime(df_log['data_invio']).dt.date
-        limite = (datetime.now() - timedelta(days=14)).date()
+        limite = (datetime.now() - timedelta(days=60)).date()
         
         duplicati = df_log[
             ((df_log['email'] == identificativo_pulito) | (df_log['targa'] == identificativo_pulito.upper())) & 

@@ -294,7 +294,7 @@ if file_caricato:
                     gia_inviato = True
 
             if gia_inviato:
-                stato_invio = "⏭️ Saltato (Già inviato <14gg)"
+                stato_invio = "⏭️ Saltato (Già inviato <60gg)"
                 risultati_campagna.append({
                     "Cliente": nome_cliente,
                     "Email": email_cliente,

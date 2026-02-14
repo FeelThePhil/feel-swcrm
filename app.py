@@ -5,6 +5,8 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import time
 import io
+import gspread 
+from datetime import datetime, timedelta
 
 st.set_page_config(
     page_title="Feel - Gestione Officina",
@@ -127,6 +129,55 @@ def invia_email(destinatario, oggetto, messaggio):
         return True
     except:
         return False
+        # --- NUOVE FUNZIONI PER GOOGLE SHEETS (IL CERVELLO) ---
+
+def get_google_sheet():
+    """Questa funzione apre la porta del tuo Foglio Google"""
+    try:
+        credentials = st.secrets["gcp_service_account"]
+        gc = gspread.service_account_from_dict(credentials)
+        # Apre il file 'Feel_Storico_Invii' e il foglio chiamato 'Log'
+        sh = gc.open("Feel_Storico_Invii").worksheet("Log")
+        return sh
+    except:
+        return None
+
+def verifica_duplicato_followup(identificativo):
+    """Questa funzione controlla se l'email o la targa sono già nel database"""
+    sheet = get_google_sheet()
+    if not sheet: return False
+    try:
+        records = sheet.get_all_records()
+        if not records: return False
+        
+        df_log = pd.DataFrame(records)
+        df_log['Data_Invio'] = pd.to_datetime(df_log['Data_Invio']).dt.date
+        limite = (datetime.now() - timedelta(days=14)).date()
+        
+        # Cerchiamo se esiste l'email o la targa contattata come 'Follow-up' negli ultimi 14gg
+        duplicati = df_log[
+            ((df_log['Email'] == str(identificativo)) | (df_log['Targa'] == str(identificativo))) & 
+            (df_log['Data_Invio'] > limite) &
+            (df_log['Tipo_Campagna'] == 'Follow-up Post Intervento')
+        ]
+        return not duplicati.empty
+    except:
+        return False
+
+def registra_invio_storico(email, targa, tipo):
+    """Questa funzione scrive i dati dell'invio sul foglio Google"""
+    sheet = get_google_sheet()
+    if sheet:
+        try:
+            # Aggiunge una riga con: Data, Email, Targa, Tipo Campagna
+            sheet.append_row([
+                datetime.now().strftime("%Y-%m-%d"), 
+                str(email), 
+                str(targa), 
+                tipo
+            ])
+        except:
+            pass
 
 # --- NUOVA INTERFACCIA ORDINATA ---
 st.title("🛡️ Feel - Gestione Lead & Comunicazioni")

@@ -165,19 +165,23 @@ def verifica_duplicato_followup(identificativo):
         return False
 
 def registra_invio_storico(email, targa, tipo):
-    """Questa funzione scrive i dati dell'invio sul foglio Google"""
+    """Questa funzione scrive i dati dell'invio sul foglio Google con messaggi di errore"""
     sheet = get_google_sheet()
     if sheet:
         try:
             # Aggiunge una riga con: Data, Email, Targa, Tipo Campagna
             sheet.append_row([
                 datetime.now().strftime("%Y-%m-%d"), 
-                str(email), 
-                str(targa), 
-                tipo
+                str(email).strip(), 
+                str(targa).strip(), 
+                str(tipo)
             ])
-        except:
-            pass
+            # Se vuoi una conferma visiva mentre invii, scommenta la riga sotto:
+            # st.toast(f"Tracciato su Sheets: {email}")
+        except Exception as e:
+            st.error(f"❌ Errore tecnico nella scrittura su Google Sheets: {e}")
+    else:
+        st.error("⚠️ Feel non riesce a connettersi al Foglio Google. Verifica il nome del file o i permessi delle API.")
 
 # --- NUOVA INTERFACCIA ORDINATA ---
 st.title("🛡️ Feel - Gestione Lead & Comunicazioni")

@@ -114,7 +114,7 @@ PASSWORD_APP = st.secrets["EMAIL_PASSWORD"]
 def invia_email(destinatario, oggetto, messaggio):
     try:
         msg = MIMEMultipart()
-        msg['From'] = EMAIL_MITTENTE
+        msg['From'] = f"OFFICINE FIORE IVECO <{EMAIL_MITTENTE}>"
         msg['To'] = destinatario
         msg['Subject'] = oggetto
         msg['Reply-To'] = "segreteria@officinefiore.it"

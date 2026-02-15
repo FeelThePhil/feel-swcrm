@@ -222,8 +222,19 @@ if tipo_campagna == "Revisione":
         "Cordiali saluti,\nOfficine Fiore"
     )
 elif tipo_campagna == "Follow-up Post Intervento":
-    oggetto_default = "Tutto bene con la tua auto?"
-    testo_default = "Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento sulla tua auto [Targa]. Volevamo assicurarci che tu sia soddisfatto.\n\nA disposizione!"
+    oggetto_default = "Tutto bene con la tua auto? - Officine Fiore"
+    testo_default = (
+        "Ciao [Nome],\n\n"
+        "è passato qualche giorno dall'ultimo intervento sul tuo mezzo targato [Targa].\n"
+        "Volevamo assicurarci che tu sia soddisfatto del servizio ricevuto.\n\n"
+        "La tua opinione è fondamentale: ci aiuteresti a migliorare con un breve sondaggio?\n\n"
+        "COMPILA IL SONDAGGIO QUI:\n"
+        "https://forms.gle/VV6o9LsZ7ipDFcAX8\n\n"
+        "Grazie per aver scelto Officine Fiore!\n\n"
+        "A disposizione,\nIl Team di Officine Fiore"
+    )
+
+
 else:
     oggetto_default = "Novità dall'Officina"
     testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità per la tua auto [Targa]. Passa a trovarci!"

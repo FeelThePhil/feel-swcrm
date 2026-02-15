@@ -222,7 +222,7 @@ if tipo_campagna == "Revisione":
         "Cordiali saluti,\nOfficine Fiore"
     )
 elif tipo_campagna == "Follow-up Post Intervento":
-    oggetto_default = "Tutto bene con la tua auto? - Officine Fiore"
+    oggetto_default = "Tutto bene con il tuo veicolo? - Officine Fiore"
     testo_default = (
         "Ciao [Nome],\n\n"
         "è passato qualche giorno dall'ultimo intervento sul tuo mezzo targato [Targa].\n"

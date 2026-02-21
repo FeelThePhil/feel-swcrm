@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
+import time
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import time
 import io
 import gspread 
 from datetime import datetime, timedelta
@@ -186,6 +186,8 @@ def registra_invio_storico(email, targa, tipo):
                 str(targa).strip(), 
                 str(tipo)
             ])
+
+            time.sleep(1.2)
             # Se vuoi una conferma visiva mentre invii, scommenta la riga sotto:
             # st.toast(f"Tracciato su Sheets: {email}")
         except Exception as e:

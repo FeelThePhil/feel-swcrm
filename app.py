@@ -7,6 +7,7 @@ from email.mime.multipart import MIMEMultipart
 import io
 import gspread 
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 st.set_page_config(
     page_title="Feel - Gestione Officina",
@@ -15,38 +16,29 @@ st.set_page_config(
     initial_sidebar_state="expanded" 
 )
 
-# Codice per nascondere il menu e la barra superiore di Streamlit
 import streamlit.components.v1 as components
 
-# 1. CSS per nascondere header e menu (quello che già facevamo)
 st.markdown("""
     <style>
     header[data-testid="stHeader"], .stAppDeployButton, #MainMenu, footer {
         display: none !important;
         visibility: hidden !important;
     }
-    /* Rimuove lo spazio bianco in alto */
     .main .block-container {
         padding-top: 0rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. JAVASCRIPT per eliminare le icone in basso (GitHub e Streamlit Badge)
 components.html(
     """
     <script>
     const removeElements = () => {
-        // Cerca i badge e la toolbar in basso
         const badges = window.parent.document.querySelectorAll('[data-testid="stStatusWidget"], [data-testid="stToolbar"], #viewerBadge');
         badges.forEach(el => el.style.display = 'none');
-        
-        // Cerca specificamente le icone di GitHub e Hosted
         const toolbar = window.parent.document.querySelector('div[data-testid="stToolbar"]');
         if (toolbar) toolbar.style.display = 'none';
     };
-    
-    // Esegue il comando subito e poi ogni secondo per sicurezza
     removeElements();
     setInterval(removeElements, 1000);
     </script>
@@ -55,32 +47,17 @@ components.html(
     width=0,
 )
 
-import streamlit as st
-
-# Funzione per il controllo accesso
 def check_password():
     if "password_correct" not in st.session_state:
-        # Centriamo il contenuto per un'estetica impeccabile
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            # INSERISCI QUI IL TUO LINK
             logo_url = "https://officinefiore.it/wp-content/uploads/2025/05/logo-fiore.svg" 
-            
-            # Usiamo HTML per visualizzare l'SVG in modo perfetto
-            st.markdown(
-                f'<div style="text-align: center;"><img src="{logo_url}" width="200"></div>', 
-                unsafe_allow_html=True
-            )
-            
+            st.markdown(f'<div style="text-align: center;"><img src="{logo_url}" width="200"></div>', unsafe_allow_html=True)
             st.title("Accesso Riservato Feel")
-            
-            # Campi di input
             username = st.text_input("Username")
             password = st.text_input("Password", type="password")
-            
             if st.button("Entra"):
-                if (username == st.secrets["USER_LOGIN"] and 
-                    password == st.secrets["USER_PASSWORD"]):
+                if username == st.secrets["USER_LOGIN"] and password == st.secrets["USER_PASSWORD"]:
                     st.session_state["password_correct"] = True
                     st.rerun()
                 else:
@@ -88,29 +65,17 @@ def check_password():
         return False
     return True
 
-# Applichiamo il blocco prima di tutto il resto
 if not check_password():
     st.stop()
 
-# --- DA QUI IN POI INCOMA IL TUO CODICE ATTUALE (IL CUORE DI FEEL) ---
+# --- CUORE DI FEEL ---
 logo_url = "https://officinefiore.it/wp-content/uploads/2025/05/logo-fiore.svg" 
-
-st.markdown(
-    f"""
-    <div style="text-align: center;">
-        <img src="{logo_url}" width="200">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+st.markdown(f'<div style="text-align: center;"><img src="{logo_url}" width="200"></div>', unsafe_allow_html=True)
 st.title("Benvenuto nel cuore di Feel")
-# ... tutto il resto del tuo codice ...
 
-# --- CREDENZIALI (Spostale qui) ---
 EMAIL_MITTENTE = "feel.swcrm@gmail.com"
 PASSWORD_APP = st.secrets["EMAIL_PASSWORD"] 
 
-# --- FUNZIONE INVIO EMAIL ---
 def invia_email(destinatario, oggetto, messaggio):
     try:
         msg = MIMEMultipart()
@@ -118,9 +83,7 @@ def invia_email(destinatario, oggetto, messaggio):
         msg['To'] = destinatario
         msg['Subject'] = oggetto
         msg['Reply-To'] = "segreteria@officinefiore.it"
-        
         msg.attach(MIMEText(messaggio, 'plain'))
-        
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(EMAIL_MITTENTE, PASSWORD_APP)
@@ -129,38 +92,27 @@ def invia_email(destinatario, oggetto, messaggio):
         return True
     except:
         return False
-        # --- NUOVE FUNZIONI PER GOOGLE SHEETS (IL CERVELLO) ---
 
 def get_google_sheet():
-    """Questa funzione apre la porta del tuo Foglio Google"""
     try:
         credentials = st.secrets["gcp_service_account"]
         gc = gspread.service_account_from_dict(credentials)
-        # Apre il file 'feel_storico_invii' e il foglio chiamato 'Log'
         sh = gc.open("feel_storico_invii").worksheet("Log")
         return sh
     except:
         return None
 
 def verifica_presenza_storico(identificativo, tipo_attuale):
-    """Controlla se l'identificativo (email o targa) ha ricevuto lo STESSO tipo di campagna negli ultimi 60gg"""
     sheet = get_google_sheet()
     if not sheet: return False
     try:
         records = sheet.get_all_records()
         if not records: return False
-        
         df_log = pd.DataFrame(records)
         df_log.columns = df_log.columns.str.strip().str.lower()
-        
-        # Pulizia dati per il confronto
         identificativo_pulito = str(identificativo).strip().lower()
-        
-        # Convertiamo la colonna data
         df_log['data_invio'] = pd.to_datetime(df_log['data_invio'], errors='coerce').dt.date
         limite = (datetime.now() - timedelta(days=60)).date()
-        
-        # FILTRO DI FERRO: Identificativo + Tipo Campagna + Limite 60gg
         duplicati = df_log[
             ((df_log['email'].str.lower() == identificativo_pulito) | 
              (df_log['targa'].str.lower() == identificativo_pulito)) & 
@@ -168,130 +120,74 @@ def verifica_presenza_storico(identificativo, tipo_attuale):
             (df_log['data_invio'] > limite)
         ]
         return not duplicati.empty
-    except Exception as e:
-        st.error(f"Errore controllo duplicati: {e}")
+    except:
         return False
 
-
-
 def registra_invio_storico(email, targa, tipo):
-    """Questa funzione scrive i dati dell'invio sul foglio Google con messaggi di errore"""
     sheet = get_google_sheet()
     if sheet:
         try:
-            # Aggiunge una riga con: Data, Email, Targa, Tipo Campagna
-            sheet.append_row([
-                datetime.now().strftime("%Y-%m-%d"), 
-                str(email).strip(), 
-                str(targa).strip(), 
-                str(tipo)
-            ])
-
+            sheet.append_row([datetime.now().strftime("%Y-%m-%d"), str(email).strip(), str(targa).strip(), str(tipo)])
             time.sleep(1.2)
-            # Se vuoi una conferma visiva mentre invii, scommenta la riga sotto:
-            # st.toast(f"Tracciato su Sheets: {email}")
         except Exception as e:
             st.error(f"❌ Errore tecnico nella scrittura su Google Sheets: {e}")
-    else:
-        st.error("⚠️ Feel non riesce a connettersi al Foglio Google. Verifica il nome del file o i permessi delle API.")
 
-# --- NUOVA INTERFACCIA ORDINATA ---
 st.title("🛡️ Feel - Gestione Lead & Comunicazioni")
 st.markdown("---")
-
-# 1. SELEZIONE CAMPAGNA (Spostata PRIMA del caricamento)
 st.subheader("🚀 1. Scegli la Campagna")
 col1, col2 = st.columns(2)
 
 with col1:
-    tipo_campagna = st.selectbox(
-        "Cosa vuoi fare oggi?", 
-        ["Revisione", "Follow-up Post Intervento", "Comunicazione Generica"],
-        key="selezione_tipo_campagna"
-    )
+    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Follow-up Post Intervento", "Comunicazione Generica"], key="selezione_tipo_campagna")
 
-# Logica dei testi preimpostati (si aggiornano subito)
 if tipo_campagna == "Revisione":
     oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officine Fiore"
-    # Messaggio in corretto italiano con tutti i campi richiesti
-    testo_default = (
-        "Gentile [Nome],\n\n"
-        "da un controllo nei nostri archivi, le ricordiamo che il Suo veicolo [Tipo] "
-        "targato [Targa] ha la revisione in scadenza entro la fine del mese prossimo.\n\n"
-        "Considerando che l'ultimo intervento risulta effettuato in data [Data_Ultima], "
-        "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitando sanzioni e fermi macchina.\n\n"
-        "Restiamo a Sua completa disposizione.\n\n"
-        "Cordiali saluti,\nOfficine Fiore"
-    )
+    testo_default = ("Gentile [Nome],\n\nda un controllo nei nostri archivi, le ricordiamo che il Suo veicolo [Tipo] "
+                     "targato [Targa] ha la revisione in scadenza entro la fine del mese prossimo.\n\n"
+                     "Considerando che l'ultimo intervento risulta effettuato in data [Data_Ultima], "
+                     "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitando sanzioni e fermi macchina.\n\n"
+                     "Restiamo a Sua completa disposizione.\n\nCordiali saluti,\nOfficine Fiore")
 elif tipo_campagna == "Follow-up Post Intervento":
     oggetto_default = "Tutto bene con il tuo veicolo? - Officine Fiore"
-    testo_default = (
-        "Ciao [Nome],\n\n"
-        "è passato qualche giorno dall'ultimo intervento sul tuo mezzo targato [Targa].\n"
-        "Volevamo assicurarci che tu sia soddisfatto del servizio ricevuto.\n\n"
-        "La tua opinione è fondamentale: ci aiuteresti a migliorare con un breve sondaggio?\n\n"
-        "COMPILA IL SONDAGGIO QUI:\n"
-        "https://forms.gle/VV6o9LsZ7ipDFcAX8\n\n"
-        "Grazie per aver scelto Officine Fiore!\n\n"
-        "A disposizione,\nIl Team di Officine Fiore"
-    )
-
-
+    testo_default = ("Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento sul tuo mezzo targato [Targa].\n"
+                     "Volevamo assicurarci che tu sia soddisfatto del servizio ricevuto.\n\n"
+                     "La tua opinione è fondamentale: ci aiuteresti a migliorare con un breve sondaggio?\n\n"
+                     "COMPILA IL SONDAGGIO QUI:\nhttps://forms.gle/VV6o9LsZ7ipDFcAX8\n\n"
+                     "Grazie per aver scelto Officine Fiore!\n\nA disposizione,\nIl Team di Officine Fiore")
 else:
     oggetto_default = "Novità dall'Officina"
     testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità per la tua auto [Targa]. Passa a trovarci!"
 
 with col2:
     oggetto = st.text_input("Oggetto Email", oggetto_default)
-
 corpo_mail = st.text_area("Personalizza il messaggio (usa [Nome] e [Targa])", testo_default, height=180)
 
 st.markdown("---")
-
-# 2. CARICAMENTO DATI (Solo dopo aver deciso la campagna)
 st.sidebar.header("📂 Carica Dati")
 file_caricato = st.sidebar.file_uploader("Carica Excel Lead per questa campagna", type=['xlsx'])
 
 if file_caricato:
     df = pd.read_excel(file_caricato)
     df.columns = df.columns.str.strip().str.lower()
-
-    # --- LOGICA PIGNOLA SOLO PER REVISIONE ---
     if tipo_campagna == "Revisione":
         if 'ultima_revisione' in df.columns:
-            from datetime import datetime
-            from dateutil.relativedelta import relativedelta
-            
-            # Convertiamo la colonna in formato data
             df['ultima_revisione'] = pd.to_datetime(df['ultima_revisione'])
-            
-            # Calcoliamo il mese target: Oggi (Febbraio) + 1 mese = Marzo
-            oggi = datetime.now()
-            mese_target = (oggi + relativedelta(months=1)).month
-            
-            # FILTRO: Prendiamo tutti quelli che hanno fatto la revisione nel mese target, 
-            # a prescindere dall'anno (così becchiamo le scadenze cicliche)
+            mese_target = (datetime.now() + relativedelta(months=1)).month
             df = df[df['ultima_revisione'].dt.month == mese_target].copy()
-            
-            st.success(f"🎯 Filtro Revisioni: Estratti {len(df)} veicoli che scadono nel mese {mese_target}")
+            st.success(f"🎯 Filtro Revisioni: Estratti {len(df)} veicoli.")
         else:
-            st.error("Attenzione: Per la campagna Revisione serve la colonna 'ultima_revisione' nell'Excel.")
-            st.stop() # Blocca l'invio se mancano i dati fondamentali
+            st.error("Manca la colonna 'ultima_revisione'.")
+            st.stop()
     
-   # 3. Anteprima e Invio
-    st.write("### 📋 Lista Lead Pronti per l'invio")
+    st.write("### 📋 Lista Lead Pronti")
     st.dataframe(df, use_container_width=True, height=400) 
 
-    # --- NUOVO CODICE "ANTI-PIOGGIA" ---
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
         progresso = st.progress(0.0)
         status_text = st.empty()
-        
         risultati_campagna = [] 
         successi = 0
         totale = len(df)
-        
-        # Questa riga impedisce di inviare 5 mail se l'Excel ha 5 righe uguali
         gia_elaborati_in_questa_sessione = set()
         
         for idx, (i, riga) in enumerate(df.iterrows()):
@@ -299,93 +195,42 @@ if file_caricato:
             email_cliente = str(riga['email']).strip().lower() if 'email' in riga else ""
             targa_veicolo = str(riga['targa']).strip().upper() if 'targa' in riga else "N.D."
             tipo_veicolo = str(riga['tipo']) if 'tipo' in riga else "veicolo"
+            data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y') if 'ultima_revisione' in riga else "N.D."
             
-            try:
-                data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y')
-            except:
-                data_ultima = "N.D."
-
-            # --- CONTROLLO DUPLICATI (Locale + Google) ---
             gia_inviato = False
-            
-            # 1. Verifichiamo se lo abbiamo già fatto in questo istante
             if email_cliente in gia_elaborati_in_questa_sessione or targa_veicolo in gia_elaborati_in_questa_sessione:
                 gia_inviato = True
-                motivo_salto = "⏭️ Saltato (Duplicato nel file Excel)"
-            
-            # 2. Verifichiamo lo storico dei 60 giorni su Google (solo se non è un invio generico)
-            elif tipo_campagna != "Comunicazione Generica":
-                if verifica_presenza_storico(email_cliente, tipo_campagna) or verifica_presenza_storico(targa_veicolo, tipo_campagna):
-                    gia_inviato = True
-                    motivo_salto = "⏭️ Saltato (Già inviato <60gg)"
+                motivo_salto = "⏭️ Saltato (Duplicato in Excel)"
+            elif tipo_campagna != "Comunicazione Generica" and (verifica_presenza_storico(email_cliente, tipo_campagna) or verifica_presenza_storico(targa_veicolo, tipo_campagna)):
+                gia_inviato = True
+                motivo_salto = "⏭️ Saltato (Già inviato <60gg)"
 
             if gia_inviato:
-                risultati_campagna.append({
-                    "Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo,
-                    "Esito": motivo_salto, "Orario": datetime.now().strftime("%H:%M:%S")
-                })
-                # Segniamo comunque nel set per sicurezza
-                gia_elaborati_in_questa_sessione.add(email_cliente)
-                gia_elaborati_in_questa_sessione.add(targa_veicolo)
+                risultati_campagna.append({"Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo, "Esito": motivo_salto, "Orario": datetime.now().strftime("%H:%M:%S")})
                 continue 
 
-            # --- INVIO EFFETTIVO ---
-            stato_invio = "❌ Fallito"
             if "@" in email_cliente and "." in email_cliente:
-                messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente)\
-                                                     .replace("[Targa]", targa_veicolo)\
-                                                     .replace("[Tipo]", tipo_veicolo)\
-                                                     .replace("[Data_Ultima]", data_ultima)
-                
-                if invia_email(email_cliente, oggetto, messaggio_personalizzato):
+                msg_p = corpo_mail.replace("[Nome]", nome_cliente).replace("[Targa]", targa_veicolo).replace("[Tipo]", tipo_veicolo).replace("[Data_Ultima]", data_ultima)
+                if invia_email(email_cliente, oggetto, msg_p):
                     successi += 1
                     stato_invio = "✅ Inviata"
                     registra_invio_storico(email_cliente, targa_veicolo, tipo_campagna)
-                    
-                    # Blocchiamo subito future ripetizioni per questa sessione
                     gia_elaborati_in_questa_sessione.add(email_cliente)
                     gia_elaborati_in_questa_sessione.add(targa_veicolo)
-                else:
-                    stato_invio = "❌ Errore SMTP"
-            else:
-                stato_invio = "⚠️ Email Errata"
+                else: stato_invio = "❌ Errore SMTP"
+            else: stato_invio = "⚠️ Email Errata"
 
-            risultati_campagna.append({
-                "Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo,
-                "Esito": stato_invio, "Orario": datetime.now().strftime("%H:%M:%S")
-            })
-            
-            # Aggiornamento UI
-            percentuale = min((idx + 1) / totale, 1.0)
-            progresso.progress(percentuale)
+            risultati_campagna.append({"Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo, "Esito": stato_invio, "Orario": datetime.now().strftime("%H:%M:%S")})
+            progresso.progress(min((idx + 1) / totale, 1.0))
             status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({idx+1}/{totale})")
-            time.sleep(2.0) # Pausa di sicurezza aumentata
+            time.sleep(1.8)
 
         st.success(f"✅ Campagna completata! Successi: {successi} su {totale}")
-        
-        
-        # --- GENERAZIONE REPORT ---
         df_report = pd.DataFrame(risultati_campagna)
-        
-        errori = df_report[df_report["Esito"] != "✅ Inviata"]
-        if not errori.empty:
-            st.warning(f"Attenzione: {len(errori)} invii non sono andati a buon fine.")
-            st.dataframe(errori)
-
-        try:
-            import io
-            buffer = io.BytesIO()
-            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                df_report.to_excel(writer, index=False, sheet_name='Report')
-            
-            st.download_button(
-                label="📥 Scarica Report Esiti (Excel)",
-                data=buffer.getvalue(),
-                file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx",
-                mime="application/vnd.ms-excel"
-            )
-        except Exception as e:
-            st.error(f"Errore nella generazione del report: {e}")
-
+        st.dataframe(df_report)
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+            df_report.to_excel(writer, index=False, sheet_name='Report')
+        st.download_button(label="📥 Scarica Report", data=buffer.getvalue(), file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx", mime="application/vnd.ms-excel")
 else:
-    st.info("⬆️ Scegli la campagna qui sopra e poi carica il file Excel dalla barra laterale per vedere i contatti.")
+    st.info("⬆️ Scegli la campagna e carica il file Excel.")

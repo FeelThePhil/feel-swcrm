@@ -142,7 +142,8 @@ def get_google_sheet():
     except:
         return None
 
-def verifica_duplicato_followup(identificativo):
+def verifica_presenza_storico(identificativo, tipo_attuale):
+    """Controlla se l'identificativo (email o targa) ha ricevuto lo STESSO tipo di campagna negli ultimi 60gg"""
     sheet = get_google_sheet()
     if not sheet: return False
     try:
@@ -150,28 +151,27 @@ def verifica_duplicato_followup(identificativo):
         if not records: return False
         
         df_log = pd.DataFrame(records)
-        # Rendiamo tutto minuscolo e senza spazi per non sbagliare
         df_log.columns = df_log.columns.str.strip().str.lower()
         
-        # Puliamo i dati nel foglio
-        df_log['email'] = df_log['email'].astype(str).str.strip().str.lower()
-        df_log['targa'] = df_log['targa'].astype(str).str.strip().str.upper()
-        
+        # Pulizia dati per il confronto
         identificativo_pulito = str(identificativo).strip().lower()
         
-        # Filtro 14 giorni
-        df_log['data_invio'] = pd.to_datetime(df_log['data_invio']).dt.date
+        # Convertiamo la colonna data
+        df_log['data_invio'] = pd.to_datetime(df_log['data_invio'], errors='coerce').dt.date
         limite = (datetime.now() - timedelta(days=60)).date()
         
+        # FILTRO DI FERRO: Identificativo + Tipo Campagna + Limite 60gg
         duplicati = df_log[
-            ((df_log['email'] == identificativo_pulito) | (df_log['targa'] == identificativo_pulito.upper())) & 
-            (df_log['data_invio'] > limite) &
-            (df_log['tipo_campagna'] == 'Follow-up Post Intervento')
+            ((df_log['email'].str.lower() == identificativo_pulito) | 
+             (df_log['targa'].str.lower() == identificativo_pulito)) & 
+            (df_log['tipo_campagna'] == tipo_attuale) &
+            (df_log['data_invio'] > limite)
         ]
         return not duplicati.empty
     except Exception as e:
         st.error(f"Errore controllo duplicati: {e}")
         return False
+
 
 
 def registra_invio_storico(email, targa, tipo):
@@ -282,6 +282,7 @@ if file_caricato:
     st.write("### 📋 Lista Lead Pronti per l'invio")
     st.dataframe(df, use_container_width=True, height=400) 
 
+    # --- NUOVO CODICE "ANTI-PIOGGIA" ---
     if st.button(f"AVVIA INVIO MASSIVO ({len(df)} email)", key="btn_invio_finale_stabile"):
         progresso = st.progress(0.0)
         status_text = st.empty()
@@ -290,35 +291,45 @@ if file_caricato:
         successi = 0
         totale = len(df)
         
+        # Questa riga impedisce di inviare 5 mail se l'Excel ha 5 righe uguali
+        gia_elaborati_in_questa_sessione = set()
+        
         for idx, (i, riga) in enumerate(df.iterrows()):
             nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
-            email_cliente = str(riga['email']).strip() if 'email' in riga else ""
-            targa_veicolo = str(riga['targa']) if 'targa' in riga else "N.D."
+            email_cliente = str(riga['email']).strip().lower() if 'email' in riga else ""
+            targa_veicolo = str(riga['targa']).strip().upper() if 'targa' in riga else "N.D."
             tipo_veicolo = str(riga['tipo']) if 'tipo' in riga else "veicolo"
             
             try:
                 data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y')
             except:
                 data_ultima = "N.D."
-              # --- INIZIO NUOVO PEZZO: CONTROLLO ANTI-DUPLICATO ---  
+
+            # --- CONTROLLO DUPLICATI (Locale + Google) ---
             gia_inviato = False
-            if tipo_campagna == "Follow-up Post Intervento":
-                if verifica_duplicato_followup(email_cliente) or verifica_duplicato_followup(targa_veicolo):
+            
+            # 1. Verifichiamo se lo abbiamo già fatto in questo istante
+            if email_cliente in gia_elaborati_in_questa_sessione or targa_veicolo in gia_elaborati_in_questa_sessione:
+                gia_inviato = True
+                motivo_salto = "⏭️ Saltato (Duplicato nel file Excel)"
+            
+            # 2. Verifichiamo lo storico dei 60 giorni su Google (solo se non è un invio generico)
+            elif tipo_campagna != "Comunicazione Generica":
+                if verifica_presenza_storico(email_cliente, tipo_campagna) or verifica_presenza_storico(targa_veicolo, tipo_campagna):
                     gia_inviato = True
+                    motivo_salto = "⏭️ Saltato (Già inviato <60gg)"
 
             if gia_inviato:
-                stato_invio = "⏭️ Saltato (Già inviato <60gg)"
                 risultati_campagna.append({
-                    "Cliente": nome_cliente,
-                    "Email": email_cliente,
-                    "Targa": targa_veicolo,
-                    "Esito": stato_invio,
-                    "Orario": datetime.now().strftime("%H:%M:%S")
+                    "Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo,
+                    "Esito": motivo_salto, "Orario": datetime.now().strftime("%H:%M:%S")
                 })
-                continue # Salta tutto il resto e passa al prossimo cliente
-                # --- FINE NUOVO PEZZO: CONTROLLO ANTI-DUPLICATO ---
-            
-            # Validazione base: l'email deve contenere @ e .
+                # Segniamo comunque nel set per sicurezza
+                gia_elaborati_in_questa_sessione.add(email_cliente)
+                gia_elaborati_in_questa_sessione.add(targa_veicolo)
+                continue 
+
+            # --- INVIO EFFETTIVO ---
             stato_invio = "❌ Fallito"
             if "@" in email_cliente and "." in email_cliente:
                 messaggio_personalizzato = corpo_mail.replace("[Nome]", nome_cliente)\
@@ -329,26 +340,29 @@ if file_caricato:
                 if invia_email(email_cliente, oggetto, messaggio_personalizzato):
                     successi += 1
                     stato_invio = "✅ Inviata"
-                    # --- REGISTRAZIONE NELLO STORICO ---
                     registra_invio_storico(email_cliente, targa_veicolo, tipo_campagna)
+                    
+                    # Blocchiamo subito future ripetizioni per questa sessione
+                    gia_elaborati_in_questa_sessione.add(email_cliente)
+                    gia_elaborati_in_questa_sessione.add(targa_veicolo)
+                else:
+                    stato_invio = "❌ Errore SMTP"
             else:
-                stato_invio = "⚠️ Email Errata/Mancante"
+                stato_invio = "⚠️ Email Errata"
 
             risultati_campagna.append({
-                "Cliente": nome_cliente,
-                "Email": email_cliente,
-                "Targa": targa_veicolo,
-                "Esito": stato_invio,
-                "Orario": datetime.now().strftime("%H:%M:%S")
+                "Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo,
+                "Esito": stato_invio, "Orario": datetime.now().strftime("%H:%M:%S")
             })
             
-            # Aggiornamento barra progresso
+            # Aggiornamento UI
             percentuale = min((idx + 1) / totale, 1.0)
             progresso.progress(percentuale)
             status_text.text(f"Stato: {stato_invio} a {email_cliente}... ({idx+1}/{totale})")
-            time.sleep(1)
+            time.sleep(2.0) # Pausa di sicurezza aumentata
 
         st.success(f"✅ Campagna completata! Successi: {successi} su {totale}")
+        
         
         # --- GENERAZIONE REPORT ---
         df_report = pd.DataFrame(risultati_campagna)

@@ -252,7 +252,7 @@ if file_caricato:
         st.download_button(label="📥 Scarica Report", data=buffer.getvalue(), file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx", mime="application/vnd.ms-excel")
 else:
     st.info("⬆️ Scegli la campagna e carica il file Excel.")
-# --- SEZIONE ANALISI PERFORMANCE (Incolla da qui) ---
+# --- SEZIONE ANALISI PERFORMANCE  ---
 st.write("") 
 st.write("") 
 st.divider()
@@ -309,23 +309,28 @@ if sheet_stat:
 else:
     st.error("Connessione al file di log fallita. Controlla le credenziali Google.")
 
-# --- SEZIONE VERSIONING (In fondo al codice) ---
-with st.sidebar:
-    st.divider()
-    with st.expander("📜 Technical Release Notes"):
-        st.markdown("""
-            **Current Build:** `V1.6 (Production Ready)`
-            
-            ---
-            **Cronologia Sviluppo:**
-            * **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
-            * **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari .
-            * **V1.4 (Security & Integrity)** - Messa in sicurezza dei file di Log e hardening della scrittura su Database per prevenire corruzioni dati.
-            * **V1.3 (API Debugging)** - Refactoring del modulo SMTP/Gmail: risoluzione conflitti di autenticazione e gestione eccezioni API.
-            * **V1.2 (Log & Persistence)** - Implementazione del sistema di Log storico per il tracciamento univoco degli invii e prevenzione ridondanze.
-            * **V1.1 (Core Architecture)** - Sviluppo dei template dinamici per le campagne (*Revisione*, *Follow-up*) e mappatura variabili `[Nome]` / `[Targa]`.
-            * **V1.0 (Infrastructure)** - Setup ambiente su GitHub, configurazione Database SQLite e interfacciamento iniziale con le API Google.
-            
-            ---
-            *Made with ❤️ for Officine Fiore*
-        """)
+# --- SEZIONE VERSIONING  ---
+
+
+
+st.write("<br>" * 10, unsafe_allow_html=True) 
+st.divider()
+
+
+with st.expander("📜 Technical Release Notes (Build History)"):
+    st.markdown("""
+        **Current Build:** `V1.6 (Production Ready)`
+        
+        ---
+        **Cronologia Sviluppo:**
+        * **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
+        * **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari.
+        * **V1.4 (Security & Integrity)** - Messa in sicurezza dei file di Log e hardening della scrittura su Database per prevenire corruzioni dati.
+        * **V1.3 (API Debugging)** - Refactoring del modulo SMTP/Gmail: risoluzione conflitti di autenticazione e gestione eccezioni API.
+        * **V1.2 (Log & Persistence)** - Implementazione del sistema di Log storico per il tracciamento univoco degli invii e prevenzione ridondanze.
+        * **V1.1 (Core Architecture)** - Sviluppo dei template dinamici per le campagne (*Revisione*, *Follow-up*) e mappatura variabili `[Nome]` / `[Targa]`.
+        * **V1.0 (Infrastructure)** - Setup ambiente su GitHub, configurazione Database SQLite e interfacciamento iniziale con le API Google.
+        
+        ---
+        *Made with ❤️ for Officine Fiore*
+    """)

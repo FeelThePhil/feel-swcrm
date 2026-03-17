@@ -249,3 +249,59 @@ if file_caricato:
         st.download_button(label="📥 Scarica Report", data=buffer.getvalue(), file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx", mime="application/vnd.ms-excel")
 else:
     st.info("⬆️ Scegli la campagna e carica il file Excel.")
+# --- SEZIONE ANALISI PERFORMANCE (Incolla da qui) ---
+st.write("") 
+st.write("") 
+st.divider()
+st.header("📊 Pannello Analisi Marketing")
+
+# Funzione rapida per caricare i dati per le statistiche
+sheet_stat = get_google_sheet()
+if sheet_stat:
+    try:
+        records_stat = sheet_stat.get_all_records()
+        if records_stat:
+            df_stats_log = pd.DataFrame(records_stat)
+            
+            # 1. Conteggio invii per tipo
+            conteggi = df_stats_log['tipo_campagna'].value_counts()
+            invii_followup = conteggi.get("Follow-up Post Intervento", 0)
+            invii_recensioni = conteggi.get("Recensione Post-revisione", 0)
+
+            # 2. Input manuale risultati
+            col_in1, col_in2 = st.columns(2)
+            with col_in1:
+                risposte_form = st.number_input("Compilazioni Google Form ricevute:", min_value=0, value=14, help="Inserisci il numero di risposte che vedi sul pannello Google Form")
+            with col_in2:
+                nuove_recensioni = st.number_input("Nuove Recensioni Google ottenute:", min_value=0, value=0, help="Inserisci quante nuove recensioni hai ricevuto da quando hai iniziato")
+
+            # 3. Visualizzazione Metriche
+            st.write("### Risultati e Conversioni")
+            m1, m2, m3 = st.columns(3)
+            
+            with m1:
+                st.metric("Mail Follow-up", invii_followup)
+                if invii_followup > 0:
+                    perc_f = (risposte_form / invii_followup) * 100
+                    st.write(f"🎯 Efficacia: **{perc_f:.1f}%**")
+            
+            with m2:
+                st.metric("Richieste Recensione", invii_recensioni)
+                if invii_recensioni > 0:
+                    perc_r = (nuove_recensioni / invii_recensioni) * 100
+                    st.write(f"🎯 Efficacia: **{perc_r:.1f}%**")
+                    
+            with m3:
+                st.metric("Totale Database Feel", len(df_stats_log))
+                st.write("Righe totali nel Log")
+
+            # Messaggio di incoraggiamento
+            if invii_followup > 0 and (risposte_form / invii_followup) > 0.10:
+                st.balloons()
+                st.success("Complimenti! Il tuo tasso di risposta è superiore al 10%, un ottimo risultato per l'officina!")
+        else:
+            st.warning("Il file di log è vuoto. Inizia a inviare per vedere le statistiche.")
+    except Exception as e:
+        st.error(f"Non è stato possibile caricare le statistiche: {e}")
+else:
+    st.error("Connessione al file di log fallita. Controlla le credenziali Google.")

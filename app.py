@@ -308,3 +308,25 @@ if sheet_stat:
         st.error(f"Non è stato possibile caricare le statistiche: {e}")
 else:
     st.error("Connessione al file di log fallita. Controlla le credenziali Google.")
+
+# --- SEZIONE VERSIONING (In fondo al codice) ---
+st.divider() # Una linea sottile di separazione
+
+with st.expander("ℹ️ Informazioni sul Software & Update History"):
+    st.markdown("""
+        **Feel - Sistema Gestione Comunicazioni**
+        *Versione Attuale:* `v5.2 (Altamura Edition)`
+        
+        ---
+        **Cronologia Aggiornamenti:**
+        * **v5.2** - Integrazione link nuovo sito web e ottimizzazione testi.
+        * **v5.1** - Correzione bug selezione campagne e restyling sondaggio.
+        * **v5.0** - Introduzione Dashboard Analitica e sistema "Balloon Celebration".
+        * **v4.0** - Sviluppo interfaccia grafica (UI) e gestione dinamica messaggi.
+        * **v3.0** - Creazione database storico invii e log di sicurezza.
+        * **v2.0** - Integrazione caricamento dati da file Excel/CSV.
+        * **v1.0** - Configurazione repository GitHub e motore invio email.
+        
+        ---
+        *Sviluppato con dedizione per Officine Fiore.*
+    """)

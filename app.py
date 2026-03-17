@@ -174,6 +174,8 @@ else:
     oggetto_default = "Novità dall'Officina"
     testo_default = "Ciao [Nome],\n\nvolevamo informarti sulle nostre ultime novità per la tua auto [Targa]. Passa a trovarci!"
 
+testo_default += "\n\n---\nP.S. Abbiamo rinnovato la nostra casa online! Passa a trovarci su www.officinefiore.it per scoprire tutte le novità e i nostri servizi specializzati."
+
 with col2:
     oggetto = st.text_input("Oggetto Email", oggetto_default)
 corpo_mail = st.text_area("Personalizza il messaggio (usa [Nome] e [Targa])", testo_default, height=180)

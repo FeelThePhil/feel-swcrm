@@ -258,7 +258,7 @@ else:
 st.write("") 
 st.write("") 
 st.divider()
-st.header("📊 Pannello Analisi Marketing")
+st.header("📊 Pannello Analisi Comunicazioni")
 
 # Funzione rapida per caricare i dati per le statistiche
 sheet_stat = get_google_sheet()

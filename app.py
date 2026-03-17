@@ -168,7 +168,7 @@ elif tipo_campagna == "Follow-up Post Intervento":
         "Ciao [Nome],\n\n"
         "sono passati pochi giorni dall'intervento sul tuo mezzo [Targa].\n"
         "Volevamo solo assicurarci che sia tutto a posto e che tu sia soddisfatto.\n\n"
-        "Ti rubiamo solo 20 secondi (promesso!) per 3 domande veloci. Ci aiuti a migliorare?\n\n"
+        "Ti rubiamo solo 30 secondi (promesso!) per 3 domande veloci. Ci aiuti a migliorare?\n\n"
         "👉 CLICCA QUI PER IL SONDAGGIO:\n"
         "https://forms.gle/VV6o9LsZ7ipDFcAX8\n\n"
         "Grazie per la tua fiducia,\n"

@@ -148,18 +148,19 @@ if tipo_campagna == "Revisione":
                      "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitando sanzioni e fermi macchina.\n\n"
                      "Restiamo a Sua completa disposizione.\n\nCordiali saluti,\nOfficine Fiore")
 elif tipo_campagna == "Recensione Post-Revisione":
-    oggetto_default = "Esito Regolare Revisione [Targa] - Officine Fiore"
+    oggetto_default = "✅ Esito Revisione Regolare: il Suo veicolo [Targa] è pronto"
     testo_default = (
         "Gentile [Nome],\n\n"
-        "siamo lieti che la revisione del Suo veicolo [Targa] abbia avuto esito regolare.\n\n"
-        "Per noi di Officine Fiore la Sua sicurezza e la Sua soddisfazione sono la priorità. "
-        "Se si è trovato bene con il nostro servizio di promemoria e assistenza, Le chiediamo "
-        "un piccolo favore: potrebbe lasciarci una recensione su Google?\n\n"
-        "Ci aiuterà a crescere e a servire sempre meglio i nostri clienti.\n\n"
-        "PUOI LASCIRE LA RECENSIONE QUI:\n"
+        "La informiamo che la procedura di revisione ministeriale per il veicolo [Targa] "
+        "si è conclusa con ESITO REGOLARE.\n\n"
+        "I dati sono stati trasmessi correttamente al portale dell'automobilista e il Suo mezzo "
+        "è ora in regola con le normative vigenti.\n\n"
+        "Speriamo che il nostro servizio di promemoria e l'assistenza in officina siano stati di Suo gradimento. "
+        "Se è soddisfatto, Le chiediamo un piccolo favore: potrebbe dedicare 20 secondi per lasciarci una recensione su Google?\n\n"
+        "Il Suo feedback è fondamentale per aiutarci a crescere e a servire sempre meglio i nostri clienti.\n\n"
+        "PUÒ LASCIARE LA RECENSIONE QUI:\n"
         "https://g.page/r/CWAYAR1IJMI2EBM/review\n\n"
-        "Grazie per la fiducia e buon viaggio!\n\n"
-        "Il Team di Officine Fiore"
+        "Grazie per la fiducia e buon viaggio con Officine Fiore!"
     )
 elif tipo_campagna == "Follow-up Post Intervento":
     oggetto_default = "Tutto bene con il tuo veicolo? - Officine Fiore"

@@ -138,7 +138,7 @@ st.subheader("🚀 1. Scegli la Campagna")
 col1, col2 = st.columns(2)
 
 with col1:
-    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Recensione Post-revisione", "Follow-up Post Intervento", "Comunicazione Generica"], key="selezione_tipo_campagna")
+    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Recensione Post-Revisione", "Follow-up Post Intervento", "Comunicazione Generica"], key="selezione_tipo_campagna")
 
 if tipo_campagna == "Revisione":
     oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officine Fiore"

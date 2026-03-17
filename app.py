@@ -310,23 +310,22 @@ else:
     st.error("Connessione al file di log fallita. Controlla le credenziali Google.")
 
 # --- SEZIONE VERSIONING (In fondo al codice) ---
-st.divider() # Una linea sottile di separazione
-
-with st.expander("ℹ️ Informazioni sul Software & Update History"):
-    st.markdown("""
-        **Feel - Sistema Gestione Comunicazioni**
-        *Versione Attuale:* `v5.2 (Altamura Edition)`
-        
-        ---
-        **Cronologia Aggiornamenti:**
-        * **v5.2** - Integrazione link nuovo sito web e ottimizzazione testi.
-        * **v5.1** - Correzione bug selezione campagne e restyling sondaggio.
-        * **v5.0** - Introduzione Dashboard Analitica e sistema "Balloon Celebration".
-        * **v4.0** - Sviluppo interfaccia grafica (UI) e gestione dinamica messaggi.
-        * **v3.0** - Creazione database storico invii e log di sicurezza.
-        * **v2.0** - Integrazione caricamento dati da file Excel/CSV.
-        * **v1.0** - Configurazione repository GitHub e motore invio email.
-        
-        ---
-        *Sviluppato con dedizione per Officine Fiore.*
-    """)
+with st.sidebar:
+    st.divider()
+    with st.expander("📜 Technical Release Notes"):
+        st.markdown("""
+            **Current Build:** `V1.6 (Production Ready)`
+            
+            ---
+            **Cronologia Sviluppo:**
+            * **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
+            * **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari .
+            * **V1.4 (Security & Integrity)** - Messa in sicurezza dei file di Log e hardening della scrittura su Database per prevenire corruzioni dati.
+            * **V1.3 (API Debugging)** - Refactoring del modulo SMTP/Gmail: risoluzione conflitti di autenticazione e gestione eccezioni API.
+            * **V1.2 (Log & Persistence)** - Implementazione del sistema di Log storico per il tracciamento univoco degli invii e prevenzione ridondanze.
+            * **V1.1 (Core Architecture)** - Sviluppo dei template dinamici per le campagne (*Revisione*, *Follow-up*) e mappatura variabili `[Nome]` / `[Targa]`.
+            * **V1.0 (Infrastructure)** - Setup ambiente su GitHub, configurazione Database SQLite e interfacciamento iniziale con le API Google.
+            
+            ---
+            *Made with ❤️ for Officine Fiore*
+        """)

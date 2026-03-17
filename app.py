@@ -138,7 +138,7 @@ st.subheader("🚀 1. Scegli la Campagna")
 col1, col2 = st.columns(2)
 
 with col1:
-    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Follow-up Post Intervento", "Comunicazione Generica"], key="selezione_tipo_campagna")
+    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Recensione Post-revisione", "Follow-up Post Intervento", "Comunicazione Generica"], key="selezione_tipo_campagna")
 
 if tipo_campagna == "Revisione":
     oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officine Fiore"
@@ -147,6 +147,20 @@ if tipo_campagna == "Revisione":
                      "Considerando che l'ultimo intervento risulta effettuato in data [Data_Ultima], "
                      "Le suggeriamo di contattarci al più presto per fissare un appuntamento ed evitando sanzioni e fermi macchina.\n\n"
                      "Restiamo a Sua completa disposizione.\n\nCordiali saluti,\nOfficine Fiore")
+elif tipo_campagna == "Recensione Post-Revisione":
+    oggetto_default = "Esito Regolare Revisione [Targa] - Officine Fiore"
+    testo_default = (
+        "Gentile [Nome],\n\n"
+        "siamo lieti che la revisione del Suo veicolo [Targa] abbia avuto esito regolare.\n\n"
+        "Per noi di Officine Fiore la Sua sicurezza e la Sua soddisfazione sono la priorità. "
+        "Se si è trovato bene con il nostro servizio di promemoria e assistenza, Le chiediamo "
+        "un piccolo favore: potrebbe lasciarci una recensione su Google?\n\n"
+        "Ci aiuterà a crescere e a servire sempre meglio i nostri clienti.\n\n"
+        "PUOI LASCIRE LA RECENSIONE QUI:\n"
+        "https://g.page/r/CWAYAR1IJMI2EBM/review\n\n"
+        "Grazie per la fiducia e buon viaggio!\n\n"
+        "Il Team di Officine Fiore"
+    )
 elif tipo_campagna == "Follow-up Post Intervento":
     oggetto_default = "Tutto bene con il tuo veicolo? - Officine Fiore"
     testo_default = ("Ciao [Nome],\n\nè passato qualche giorno dall'ultimo intervento sul tuo mezzo targato [Targa].\n"

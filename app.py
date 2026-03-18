@@ -155,7 +155,7 @@ elif tipo_campagna == "Recensione Post-Revisione":
         "Le pratiche sono già state trasmesse al Portale dell'Automobilista.\n\n"
         "Se è soddisfatto del nostro servizio, ci lascerebbe una recensione veloce su Google? Bastano 20 secondi e per noi è un aiuto prezioso.\n\n"
         "⭐️ RECENSISCI QUI:\n"
-        "https://g.page/r/CWAYAR1IJMI2EBM/review\n\n"
+        " https://g.page/r/CWAYAR1IJMI2EBM/review \n\n"
         "Grazie per la fiducia e buon viaggio con Officine Fiore!"
     )
 elif tipo_campagna == "Follow-up Post Intervento":
@@ -166,7 +166,7 @@ elif tipo_campagna == "Follow-up Post Intervento":
         "Volevamo solo assicurarci che sia tutto a posto e che tu sia soddisfatto.\n\n"
         "Ti rubiamo solo 30 secondi (promesso!) per 3 domande veloci. Ci aiuti a migliorare?\n\n"
         "👉 CLICCA QUI PER IL SONDAGGIO:\n"
-        "https://forms.gle/VV6o9LsZ7ipDFcAX8\n\n"
+        " https://forms.gle/VV6o9LsZ7ipDFcAX8 \n\n"
         "Grazie per la tua fiducia,\n"
         "Il Team di Officine Fiore"
     )

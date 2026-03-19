@@ -228,8 +228,14 @@ if file_caricato:
                 continue 
 
             if "@" in email_cliente and "." in email_cliente:
+                
+                oggetto_p = oggetto.replace("[Targa]", targa_veicolo).replace("[Nome]", nome_cliente)
+                
+                
                 msg_p = corpo_mail.replace("[Nome]", nome_cliente).replace("[Targa]", targa_veicolo).replace("[Tipo]", tipo_veicolo).replace("[Data_Ultima]", data_ultima)
-                if invia_email(email_cliente, oggetto, msg_p):
+                
+                
+                if invia_email(email_cliente, oggetto_p, msg_p):
                     successi += 1
                     stato_invio = "✅ Inviata"
                     registra_invio_storico(email_cliente, targa_veicolo, tipo_campagna)
@@ -269,7 +275,7 @@ if sheet_stat:
             # 1. Conteggio invii per tipo
             conteggi = df_stats_log['tipo_campagna'].value_counts()
             invii_followup = conteggi.get("Follow-up Post Intervento", 0)
-            invii_recensioni = conteggi.get("Recensione Post-revisione", 0)
+            invii_recensioni = conteggi.get("Recensione Post-Revisione", 0)
 
             # 2. Input manuale risultati
             col_in1, col_in2 = st.columns(2)

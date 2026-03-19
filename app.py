@@ -325,10 +325,11 @@ st.divider()
 
 with st.expander("📜 Technical Release Notes (Build History)"):
     st.markdown("""
-        **Current Build:** `V1.6 (Production Ready)`
+        **Current Build:** `V1.7 `
         
         ---
         **Cronologia Sviluppo:**
+        * **V1.7 (Bug Fix)** - Risolto mancato rimpiazzo segnaposto `[Targa]` nell'oggetto email e allineamento case-sensitivity statistiche.
         * **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
         * **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari.
         * **V1.4 (Security & Integrity)** - Messa in sicurezza dei file di Log e hardening della scrittura su Database per prevenire corruzioni dati.

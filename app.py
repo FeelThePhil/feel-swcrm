@@ -170,7 +170,7 @@ elif tipo_campagna == "Follow-up Post Intervento":
         "Grazie per la tua fiducia,\n"
         "Il Team di Officine Fiore"
     )
-    elif tipo_campagna == "Richiamo Tachigrafo":
+elif tipo_campagna == "Richiamo Tachigrafo":
     oggetto_default = "⏱️ Scadenza Certificato Tachigrafo [Targa] - Officine Fiore"
     testo_default = (
         "Gentile [cliente],\n\n"

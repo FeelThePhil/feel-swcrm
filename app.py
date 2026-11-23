@@ -175,7 +175,7 @@ elif tipo_campagna == "Follow-up Post Intervento":
         "Il Team di Officine Fiore"
     )
 elif tipo_campagna == "Richiamo Tachigrafo":
-    oggetto_default = "⏱️ Promemoria scadenza tachigrafo per [targa] - Officine Fiore"
+    oggetto_default = "⏱️ Promemoria tachigrafo per [targa] - Officine Fiore"
     testo_default = (
         "Ciao [cliente],\n\n"
         "un piccolo promemoria da tenere sul cruscotto: il certificato del tachigrafo "
@@ -184,9 +184,9 @@ elif tipo_campagna == "Richiamo Tachigrafo":
         "Ti avvisiamo in anticipo così puoi pianificare il passaggio quando ti torna meglio, "
         "senza dover rincorrere le scadenze all'ultimo giorno. Se ti serve una mano per "
         "trovare l'orario giusto, siamo qui!\n\n"
+        "Se hai già provveduto per altri motivi nel corso di questi due anni, ignora pure questa email!\n\n"
         "A presto,\n"
         "Officine Fiore"
-    )
     )
 else:
     oggetto_default = "Novità dall'Officina"

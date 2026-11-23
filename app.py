@@ -175,15 +175,18 @@ elif tipo_campagna == "Follow-up Post Intervento":
         "Il Team di Officine Fiore"
     )
 elif tipo_campagna == "Richiamo Tachigrafo":
-    oggetto_default = "⏱️ Scadenza Certificato Tachigrafo [Targa] - Officine Fiore"
+    oggetto_default = "⏱️ Promemoria scadenza tachigrafo per [targa] - Officine Fiore"
     testo_default = (
-        "Gentile [Nome],\n\n"
-        "dai nostri archivi risulta che il certificato del tachigrafo relativo al veicolo "
-        "targato [Targa] (Telaio: [Telaio]), eseguito in data [Data_Esecuzione], "
-        "andrà in scadenza nel corso del mese prossimo (entro il [Data_Scadenza]).\n\n"
-        "Per evitare sanzioni e fermi del mezzo, ti invitiamo a contattarci per fissare "
-        "il rinnovo periodico biennale presso la nostra officina.\n\n"
-        "Cordiali saluti,\nOfficine Fiore"
+        "Ciao [cliente],\n\n"
+        "un piccolo promemoria da tenere sul cruscotto: il certificato del tachigrafo "
+        "per [targa] (telaio [telaio]), fatto il [data_tacho], arriverà a scadenza "
+        "il mese prossimo (entro il [data_scadenza]).\n\n"
+        "Ti avvisiamo in anticipo così puoi pianificare il passaggio quando ti torna meglio, "
+        "senza dover rincorrere le scadenze all'ultimo giorno. Se ti serve una mano per "
+        "trovare l'orario giusto, siamo qui!\n\n"
+        "A presto,\n"
+        "Officine Fiore"
+    )
     )
 else:
     oggetto_default = "Novità dall'Officina"
@@ -273,18 +276,26 @@ if file_caricato:
             if "@" in email_cliente and "." in email_cliente:
                 oggetto_p = (
                     oggetto.replace("[Targa]", targa_veicolo)
+                           .replace("[targa]", targa_veicolo)
                            .replace("[Nome]", nome_cliente)
+                           .replace("[cliente]", nome_cliente)
                            .replace("[Telaio]", telaio_veicolo)
+                           .replace("[telaio]", telaio_veicolo)
                 )
                 
                 msg_p = (
                     corpo_mail.replace("[Nome]", nome_cliente)
+                              .replace("[cliente]", nome_cliente)
                               .replace("[Targa]", targa_veicolo)
+                              .replace("[targa]", targa_veicolo)
                               .replace("[Telaio]", telaio_veicolo)
+                              .replace("[telaio]", telaio_veicolo)
                               .replace("[Tipo]", tipo_veicolo)
                               .replace("[Data_Ultima]", data_ultima)
                               .replace("[Data_Esecuzione]", data_tacho_str)
+                              .replace("[data_tacho]", data_tacho_str)
                               .replace("[Data_Scadenza]", data_scadenza_str)
+                              .replace("[data_scadenza]", data_scadenza_str)
                 )
                 
                 if invia_email(email_cliente, oggetto_p, msg_p):

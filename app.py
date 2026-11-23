@@ -138,7 +138,7 @@ st.subheader("🚀 1. Scegli la Campagna")
 col1, col2 = st.columns(2)
 
 with col1:
-    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Recensione Post-Revisione", "Follow-up Post Intervento", "Comunicazione Generica"], key="selezione_tipo_campagna")
+    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Recensione Post-Revisione", "Follow-up Post Intervento", "Richiamo Tachigrafo", "Comunicazione Generica"], key="selezione_tipo_campagna")
 
 if tipo_campagna == "Revisione":
     oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officine Fiore"
@@ -169,6 +169,17 @@ elif tipo_campagna == "Follow-up Post Intervento":
         " https://forms.gle/VV6o9LsZ7ipDFcAX8 \n\n"
         "Grazie per la tua fiducia,\n"
         "Il Team di Officine Fiore"
+    )
+    elif tipo_campagna == "Richiamo Tachigrafo":
+    oggetto_default = "⏱️ Scadenza Certificato Tachigrafo [Targa] - Officine Fiore"
+    testo_default = (
+        "Gentile [cliente],\n\n"
+        "dai nostri archivi risulta che il certificato del tachigrafo relativo al veicolo "
+        "targato [targa] (Telaio: [telaio]), eseguito in data [data_tacho], "
+        "andrà in scadenza nel corso del mese prossimo (entro il [sata_scadenza]).\n\n"
+        "Per evitare sanzioni e fermi del mezzo, ti invitiamo a contattarci per fissare "
+        "il rinnovo periodico biennale presso la nostra officina.\n\n"
+        "Cordiali saluti,\nOfficine Fiore"
     )
 else:
     oggetto_default = "Novità dall'Officina"

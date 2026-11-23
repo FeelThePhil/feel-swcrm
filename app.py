@@ -138,7 +138,11 @@ st.subheader("🚀 1. Scegli la Campagna")
 col1, col2 = st.columns(2)
 
 with col1:
-    tipo_campagna = st.selectbox("Cosa vuoi fare oggi?", ["Revisione", "Recensione Post-Revisione", "Follow-up Post Intervento", "Richiamo Tachigrafo", "Comunicazione Generica"], key="selezione_tipo_campagna")
+    tipo_campagna = st.selectbox(
+        "Cosa vuoi fare oggi?",
+        ["Revisione", "Recensione Post-Revisione", "Follow-up Post Intervento", "Richiamo Tachigrafo", "Comunicazione Generica"],
+        key="selezione_tipo_campagna"
+    )
 
 if tipo_campagna == "Revisione":
     oggetto_default = "⚠️ Scadenza Revisione Ministeriale - Officine Fiore"
@@ -173,10 +177,10 @@ elif tipo_campagna == "Follow-up Post Intervento":
 elif tipo_campagna == "Richiamo Tachigrafo":
     oggetto_default = "⏱️ Scadenza Certificato Tachigrafo [Targa] - Officine Fiore"
     testo_default = (
-        "Gentile [cliente],\n\n"
+        "Gentile [Nome],\n\n"
         "dai nostri archivi risulta che il certificato del tachigrafo relativo al veicolo "
-        "targato [targa] (Telaio: [telaio]), eseguito in data [data_tacho], "
-        "andrà in scadenza nel corso del mese prossimo (entro il [sata_scadenza]).\n\n"
+        "targato [Targa] (Telaio: [Telaio]), eseguito in data [Data_Esecuzione], "
+        "andrà in scadenza nel corso del mese prossimo (entro il [Data_Scadenza]).\n\n"
         "Per evitare sanzioni e fermi del mezzo, ti invitiamo a contattarci per fissare "
         "il rinnovo periodico biennale presso la nostra officina.\n\n"
         "Cordiali saluti,\nOfficine Fiore"
@@ -189,7 +193,7 @@ testo_default += "\n\n---\nP.S. Abbiamo rinnovato la nostra casa online! Passa a
 
 with col2:
     oggetto = st.text_input("Oggetto Email", oggetto_default)
-corpo_mail = st.text_area("Personalizza il messaggio (usa [Nome] e [Targa])", testo_default, height=180)
+corpo_mail = st.text_area("Personalizza il messaggio (usa [Nome], [Targa], [Telaio], [Data_Esecuzione], [Data_Scadenza])", testo_default, height=180)
 
 st.markdown("---")
 st.sidebar.header("📂 Carica Dati")
@@ -198,14 +202,39 @@ file_caricato = st.sidebar.file_uploader("Carica Excel Lead per questa campagna"
 if file_caricato:
     df = pd.read_excel(file_caricato)
     df.columns = df.columns.str.strip().str.lower()
+
+    # Uniforma la colonna 'cliente' in 'nome' per compatibilità con il resto dello script
+    if "cliente" in df.columns and "nome" not in df.columns:
+        df = df.rename(columns={"cliente": "nome"})
+
     if tipo_campagna == "Revisione":
         if 'ultima_revisione' in df.columns:
-            df['ultima_revisione'] = pd.to_datetime(df['ultima_revisione'])
+            df['ultima_revisione'] = pd.to_datetime(df['ultima_revisione'], dayfirst=True, errors='coerce')
             mese_target = (datetime.now() + relativedelta(months=1)).month
             df = df[df['ultima_revisione'].dt.month == mese_target].copy()
             st.success(f"🎯 Filtro Revisioni: Estratti {len(df)} veicoli.")
         else:
             st.error("Manca la colonna 'ultima_revisione'.")
+            st.stop()
+
+    elif tipo_campagna == "Richiamo Tachigrafo":
+        if 'data_tacho' in df.columns:
+            df['data_tacho'] = pd.to_datetime(df['data_tacho'], dayfirst=True, errors='coerce')
+            df = df.dropna(subset=['data_tacho']).copy()
+
+            # Calcola la scadenza esatta a +2 anni dalla calibrazione
+            df['data_scadenza'] = df['data_tacho'].apply(lambda d: d + relativedelta(years=2))
+
+            # Estrae solo i veicoli che scadono il mese prossimo (es. a dicembre estrae gennaio)
+            target = datetime.now() + relativedelta(months=1)
+            df = df[
+                (df['data_scadenza'].dt.year == target.year) &
+                (df['data_scadenza'].dt.month == target.month)
+            ].copy()
+
+            st.success(f"🎯 Filtro Tachigrafi (scadenze {target.strftime('%m/%Y')}): Estratti {len(df)} veicoli.")
+        else:
+            st.error("Manca la colonna 'data_tacho' nel file Excel.")
             st.stop()
     
     st.write("### 📋 Lista Lead Pronti")
@@ -220,11 +249,14 @@ if file_caricato:
         gia_elaborati_in_questa_sessione = set()
         
         for idx, (i, riga) in enumerate(df.iterrows()):
-            nome_cliente = str(riga['nome']) if 'nome' in riga else "Cliente"
-            email_cliente = str(riga['email']).strip().lower() if 'email' in riga else ""
-            targa_veicolo = str(riga['targa']).strip().upper() if 'targa' in riga else "N.D."
-            tipo_veicolo = str(riga['tipo']) if 'tipo' in riga else "veicolo"
-            data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y') if 'ultima_revisione' in riga else "N.D."
+            nome_cliente = str(riga['nome']).strip() if 'nome' in riga and pd.notna(riga['nome']) else "Cliente"
+            email_cliente = str(riga['email']).strip().lower() if 'email' in riga and pd.notna(riga['email']) else ""
+            targa_veicolo = str(riga['targa']).strip().upper() if 'targa' in riga and pd.notna(riga['targa']) else "N.D."
+            telaio_veicolo = str(riga['telaio']).strip().upper() if 'telaio' in riga and pd.notna(riga['telaio']) else "N.D."
+            tipo_veicolo = str(riga['tipo']).strip() if 'tipo' in riga and pd.notna(riga['tipo']) else "veicolo"
+            data_ultima = riga['ultima_revisione'].strftime('%d/%m/%Y') if 'ultima_revisione' in riga and pd.notna(riga['ultima_revisione']) else "N.D."
+            data_tacho_str = riga['data_tacho'].strftime('%d/%m/%Y') if 'data_tacho' in riga and pd.notna(riga['data_tacho']) else "N.D."
+            data_scadenza_str = riga['data_scadenza'].strftime('%d/%m/%Y') if 'data_scadenza' in riga and pd.notna(riga['data_scadenza']) else "N.D."
             
             gia_inviato = False
             if email_cliente in gia_elaborati_in_questa_sessione or targa_veicolo in gia_elaborati_in_questa_sessione:
@@ -239,12 +271,21 @@ if file_caricato:
                 continue 
 
             if "@" in email_cliente and "." in email_cliente:
+                oggetto_p = (
+                    oggetto.replace("[Targa]", targa_veicolo)
+                           .replace("[Nome]", nome_cliente)
+                           .replace("[Telaio]", telaio_veicolo)
+                )
                 
-                oggetto_p = oggetto.replace("[Targa]", targa_veicolo).replace("[Nome]", nome_cliente)
-                
-                
-                msg_p = corpo_mail.replace("[Nome]", nome_cliente).replace("[Targa]", targa_veicolo).replace("[Tipo]", tipo_veicolo).replace("[Data_Ultima]", data_ultima)
-                
+                msg_p = (
+                    corpo_mail.replace("[Nome]", nome_cliente)
+                              .replace("[Targa]", targa_veicolo)
+                              .replace("[Telaio]", telaio_veicolo)
+                              .replace("[Tipo]", tipo_veicolo)
+                              .replace("[Data_Ultima]", data_ultima)
+                              .replace("[Data_Esecuzione]", data_tacho_str)
+                              .replace("[Data_Scadenza]", data_scadenza_str)
+                )
                 
                 if invia_email(email_cliente, oggetto_p, msg_p):
                     successi += 1
@@ -252,8 +293,10 @@ if file_caricato:
                     registra_invio_storico(email_cliente, targa_veicolo, tipo_campagna)
                     gia_elaborati_in_questa_sessione.add(email_cliente)
                     gia_elaborati_in_questa_sessione.add(targa_veicolo)
-                else: stato_invio = "❌ Errore SMTP"
-            else: stato_invio = "⚠️ Email Errata"
+                else:
+                    stato_invio = "❌ Errore SMTP"
+            else:
+                stato_invio = "⚠️ Email Errata"
 
             risultati_campagna.append({"Cliente": nome_cliente, "Email": email_cliente, "Targa": targa_veicolo, "Esito": stato_invio, "Orario": datetime.now().strftime("%H:%M:%S")})
             progresso.progress(min((idx + 1) / totale, 1.0))
@@ -269,13 +312,13 @@ if file_caricato:
         st.download_button(label="📥 Scarica Report", data=buffer.getvalue(), file_name=f"Report_Feel_{datetime.now().strftime('%d-%m')}.xlsx", mime="application/vnd.ms-excel")
 else:
     st.info("⬆️ Scegli la campagna e carica il file Excel.")
+
 # --- SEZIONE ANALISI PERFORMANCE  ---
 st.write("") 
 st.write("") 
 st.divider()
 st.header("📊 Pannello Analisi Comunicazioni")
 
-# Funzione rapida per caricare i dati per le statistiche
 sheet_stat = get_google_sheet()
 if sheet_stat:
     try:
@@ -327,27 +370,24 @@ else:
     st.error("Connessione al file di log fallita. Controlla le credenziali Google.")
 
 # --- SEZIONE VERSIONING  ---
-
-
-
 st.write("<br>" * 10, unsafe_allow_html=True) 
 st.divider()
 
-
 with st.expander("📜 Technical Release Notes (Build History)"):
     st.markdown("""
-        **Current Build:** `V1.7 `
+        **Current Build:** `V1.8`
         
         ---
         **Cronologia Sviluppo:**
-        * **V1.7 (Bug Fix)** - Risolto mancato rimpiazzo segnaposto `[Targa]` nell'oggetto email e allineamento case-sensitivity statistiche.
-        * **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
-        * **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari.
-        * **V1.4 (Security & Integrity)** - Messa in sicurezza dei file di Log e hardening della scrittura su Database per prevenire corruzioni dati.
-        * **V1.3 (API Debugging)** - Refactoring del modulo SMTP/Gmail: risoluzione conflitti di autenticazione e gestione eccezioni API.
-        * **V1.2 (Log & Persistence)** - Implementazione del sistema di Log storico per il tracciamento univoco degli invii e prevenzione ridondanze.
-        * **V1.1 (Core Architecture)** - Sviluppo dei template dinamici per le campagne (*Revisione*, *Follow-up*) e mappatura variabili `[Nome]` / `[Targa]`.
-        * **V1.0 (Infrastructure)** - Setup ambiente su GitHub, configurazione Database SQLite e interfacciamento iniziale con le API Google.
+- **V1.8 (New Campaign)** - Aggiunta campagna **Richiamo Tachigrafo** con calcolo automatico scadenza biennale (`data_tacho + 2 anni`) sul mese successivo e mappatura `[Telaio]`, `[Data_Esecuzione]`, `[Data_Scadenza]`.
+- **V1.7 (Bug Fix)** - Risolto mancato rimpiazzo segnaposto `[Targa]` nell'oggetto email e allineamento case-sensitivity statistiche.
+- **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
+- **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari.
+- **V1.4 (Security & Integrity)** - Messa in sicurezza dei file di Log e hardening della scrittura su Database per prevenire corruzioni dati.
+- **V1.3 (API Debugging)** - Refactoring del modulo SMTP/Gmail: risoluzione conflitti di autenticazione e gestione eccezioni API.
+- **V1.2 (Log & Persistence)** - Implementazione del sistema di Log storico per il tracciamento univoco degli invii e prevenzione ridondanze.
+- **V1.1 (Core Architecture)** - Sviluppo dei template dinamici per le campagne (*Revisione*, *Follow-up*) e mappatura variabili `[Nome]` / `[Targa]`.
+- **V1.0 (Infrastructure)** - Setup ambiente su GitHub, configurazione Database SQLite e interfacciamento iniziale con le API Google.
         
         ---
         *Made with ❤️ for Officine Fiore*

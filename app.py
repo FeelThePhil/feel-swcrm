@@ -390,7 +390,7 @@ with st.expander("📜 Technical Release Notes (Build History)"):
         
         ---
         **Cronologia Sviluppo:**
-- **V1.8 (New Campaign)** - Aggiunta campagna **Richiamo Tachigrafo** con calcolo automatico scadenza biennale (`data_tacho + 2 anni`) sul mese successivo e mappatura `[Telaio]`, `[Data_Esecuzione]`, `[Data_Scadenza]`.
+- **V1.8 (New Campaign)** - Aggiunta campagna **Richiamo Tachigrafo** con calcolo automatico scadenza biennale (`data_tacho + 2 anni`) File aggiornato al 23/11/2026 .
 - **V1.7 (Bug Fix)** - Risolto mancato rimpiazzo segnaposto `[Targa]` nell'oggetto email e allineamento case-sensitivity statistiche.
 - **V1.6 (Marketing & UX)** - Ottimizzazione copywriting, integrazione link sito `officinefiore.it` e fix case-sensitivity selettore campagne.
 - **V1.5 (UX & Celebration)** - Implementazione modulo **Analisi Comunicazioni** campagna *Richiesta Recensione* e triggering effetti particellari.
